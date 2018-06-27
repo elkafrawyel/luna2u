@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/error_root_view"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#94000000"
+    android:visibility="visible"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <ImageView
+        android:id="@+id/error_icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        app:layout_constraintBottom_toTopOf="@+id/error_message"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:src="@drawable/ic_cloud_off"
+        android:contentDescription="@null" />
+
+    <TextView
+        android:id="@+id/error_message"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="An error found"
+        android:textSize="40sp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <Button
+        android:id="@+id/error_dismiss_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Dismiss"
+        android:textSize="30sp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="8dp"
+        android:padding="16dp"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:nextFocusRight="@+id/error_refresh_btn"
+        android:nextFocusUp="@+id/error_dismiss_btn"
+        android:nextFocusDown="@+id/error_dismiss_btn"
+        app:layout_constraintHorizontal_chainStyle="packed"
+        app:layout_constraintTop_toBottomOf="@+id/error_message"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/error_refresh_btn"/>
+
+    <Button
+        android:id="@+id/error_refresh_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Try Again"
+        android:textSize="30sp"
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="8dp"
+        android:padding="16dp"
+        android:focusable="true"
+        android:nextFocusUp="@+id/error_refresh_btn"
+        android:nextFocusDown="@+id/error_refresh_btn"
+        android:focusableInTouchMode="true"
+        android:nextFocusLeft="@id/error_dismiss_btn"
+        app:layout_constraintTop_toBottomOf="@+id/error_message"
+        app:layout_constraintStart_toEndOf="@id/error_dismiss_btn"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+</android.support.constraint.ConstraintLayout>

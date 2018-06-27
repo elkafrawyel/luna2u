@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="12dp"
+    android:background="@drawable/phone_choose_dialog">
+
+    <ImageView
+        android:id="@+id/logo"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:layout_marginBottom="8dp"
+        android:src="@drawable/logo"
+        android:layout_centerHorizontal="true"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="18dp"
+        android:text="Open Videos with :"
+        android:layout_centerHorizontal="true"
+        android:textColor="@color/text_color"
+        android:layout_below="@+id/logo"
+        android:id="@+id/txtMessage"
+        />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_below="@+id/txtMessage"
+        android:layout_marginStart="12dp"
+        android:layout_marginEnd="12dp"
+        android:layout_marginTop="12dp"
+        android:id="@+id/btn_linear">
+
+        <Button
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="Default Player"
+            android:textColor="@color/text_color"
+            android:textSize="18dp"
+            android:textAllCaps="false"
+            android:gravity="center"
+            android:id="@+id/btn_choose_Exo"
+            android:background="@drawable/phone_choose_btn"/>
+
+        <Button
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="VLC Player"
+            android:textColor="@color/text_color"
+            android:textAllCaps="false"
+            android:layout_marginStart="8dp"
+            android:textSize="18dp"
+            android:id="@+id/btn_choose_Vlc"
+            android:gravity="center"
+            android:background="@drawable/phone_choose_btn"/>
+    </LinearLayout>
+
+    <CheckBox
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/checkbox"
+        android:layout_below="@+id/btn_linear"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="12dp"
+        android:textColor="@color/text_color"
+        android:textSize="18dp"
+        android:text="Don't ask again."
+        />
+</RelativeLayout>
