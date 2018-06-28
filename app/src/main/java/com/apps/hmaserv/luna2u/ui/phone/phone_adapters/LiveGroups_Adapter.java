@@ -3,6 +3,7 @@ package com.apps.hmaserv.luna2u.ui.phone.phone_adapters;
 import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -40,7 +41,7 @@ public class LiveGroups_Adapter extends RecyclerView.Adapter<LiveGroups_Adapter.
     @Override
     public void onBindViewHolder(@NonNull LiveCat_viewHolder holder, int position) {
         LiveGroupsModel model=Data.get(position);
-        holder.LiveCatName.setText(model.getName());
+        holder.LiveCatName.setText(model.getName().toUpperCase());
 
     }
 
@@ -51,6 +52,8 @@ public class LiveGroups_Adapter extends RecyclerView.Adapter<LiveGroups_Adapter.
 
     class LiveCat_viewHolder extends RecyclerView.ViewHolder{
 
+        @BindView(R.id.group_card)
+        CardView group_card;
         @BindView(R.id.liveCat_name)
         TextView LiveCatName;
         LiveCat_viewHolder(View itemView) {
@@ -58,7 +61,7 @@ public class LiveGroups_Adapter extends RecyclerView.Adapter<LiveGroups_Adapter.
             ButterKnife.bind(this,itemView);
         }
 
-        @OnClick(R.id.liveCat_name)
+        @OnClick(R.id.group_card)
         void OpenLives(){
             Intent intent=new Intent(mContext, LiveChannels_activity.class);
             intent.putExtra("id",Data.get(getAdapterPosition()).getId());

@@ -19,3 +19,35 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+
+# OkHttp
+-keepattributes Signature
+-keepattributes *Annotation*
+-keep class okhttp3.** { *; }
+-keep interface okhttp3.** { *; }
+-dontwarn okhttp3.**
+
+#shapeimageview
+-keepattributes *Annotation,Signature
+-dontwarn com.github.siyamed.**
+-keep class com.github.siyamed.shapeimageview.**{ *; }
+-dontwarn org.xmlpull.v1.**
+-dontwarn okio.**
+
+#utilcode
+-keep class com.blankj.utilcode.** { *; }
+-keepclassmembers class com.blankj.utilcode.** { *; }
+-dontwarn com.blankj.utilcode.**
+
+#Glide
+-keep public class * implements com.bumptech.glide.module.GlideModule
+-keep public class * extends com.bumptech.glide.module.AppGlideModule
+-keep public enum com.bumptech.glide.load.ImageHeaderParser$** {
+  **[] $VALUES;
+  public *;
+}
+
+-keep class com.apps.hmaserv.luna2u.data.model.** {*;}
+-keep class org.xmlpull.v1.** { *; }
+-dontwarn com.apps.hmaserv.luna2u.**

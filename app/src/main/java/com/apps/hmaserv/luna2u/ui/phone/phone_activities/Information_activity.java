@@ -47,7 +47,8 @@ public class Information_activity extends AppCompatActivity
         setContentView(R.layout.activity_information);
         ButterKnife.bind(this);
         setSupportActionBar(toolbar);
-        final Drawable upArrow =  ContextCompat.getDrawable(this, R.drawable.abc_ic_ab_back_material);
+        final Drawable upArrow =  ContextCompat.getDrawable(this, R.drawable
+                .abc_ic_ab_back_material);
         if (upArrow != null) {
             upArrow.setColorFilter(ContextCompat.getColor(this, R.color.text_color), PorterDuff.Mode.SRC_ATOP);
         }
@@ -92,15 +93,16 @@ public class Information_activity extends AppCompatActivity
             });
         }else
             MDToast.makeText(this, "No Internet Connection Available.",
-                    Toast.LENGTH_SHORT,MDToast.TYPE_INFO).show();
+                    Toast.LENGTH_SHORT,MDToast.TYPE_WARNING).show();
     }
 
     @Override
     public void onSuccess(String result) throws JSONException {
         JSONObject object=new JSONObject(result);
-        Email.setText("Email : "+object.getString("email"));
-        Status.setText("Status : "+object.getString("status"));
-        Expires.setText("Expires On : "+getDateCurrentTimeZone(Long.parseLong(object.getString("expires"))));
+        Email.setText(getString(R.string.email).concat(object.getString("email")));
+        Status.setText(getString(R.string.status).concat(object.getString("status")));
+        Expires.setText(getString(R.string.expires).concat(getDateCurrentTimeZone
+                (Long.parseLong(object.getString("expires")))));
     }
 
     public  String getDateCurrentTimeZone(long timestamp) {
@@ -114,6 +116,8 @@ public class Information_activity extends AppCompatActivity
             Date currenTimeZone = (Date) calendar.getTime();
             return sdf.format(currenTimeZone);
         }catch (Exception e) {
+            MDToast.makeText(this, "Error catching some information",
+                    Toast.LENGTH_SHORT,MDToast.TYPE_ERROR).show();
         }
         return "";
     }

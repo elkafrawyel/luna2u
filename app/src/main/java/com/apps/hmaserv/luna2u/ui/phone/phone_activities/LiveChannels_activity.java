@@ -153,10 +153,7 @@ public class LiveChannels_activity extends AppCompatActivity
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            startActivity(new Intent(this, LiveSettings_activity.class));
-            return true;
-        } else if (id == R.id.action_search) {
+        if (id == R.id.action_search) {
             if (Channels.size() > 0) {
                 firstTime = false;
                 SearchLiveChannelsDialog dialog = new SearchLiveChannelsDialog(

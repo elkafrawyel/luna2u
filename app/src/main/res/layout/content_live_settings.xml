@@ -63,7 +63,7 @@
         android:textColor="@color/text_color"
         android:text="Information"
         android:textSize="18sp"
-        android:drawableStart="@drawable/ic_info_white_24dp"
+        android:drawableStart="@drawable/info_24"
         android:drawablePadding="16dp"/>
 
     <View

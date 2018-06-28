@@ -8,7 +8,7 @@
     <color name="colorWhiteDivider">#1FFFFFFF</color>
     <color name="colorError">#F44336</color>
     <color name="progressbar_color">#F44336</color>
-    <color name="text_color">#FFDA4B</color>
+    <color name="text_color">#ECBE11</color>
     <color name="login_background_color">#FFFFFF</color>
     <color name="CardView_color">#FF37474F</color>
 

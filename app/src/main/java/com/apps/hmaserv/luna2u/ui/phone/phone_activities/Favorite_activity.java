@@ -15,6 +15,7 @@ import com.apps.hmaserv.luna2u.R;
 import com.apps.hmaserv.luna2u.data.LunaDatabase;
 import com.apps.hmaserv.luna2u.data.model.LiveChannelsModel;
 import com.apps.hmaserv.luna2u.ui.phone.phone_adapters.LiveChannels_Adapter;
+import com.valdesekamdem.library.mdtoast.MDToast;
 
 import java.util.ArrayList;
 
@@ -54,7 +55,8 @@ public class Favorite_activity extends AppCompatActivity {
             adapter = new LiveChannels_Adapter(FavList, this);
             fav_rv.setAdapter(adapter);
         }else
-            Toast.makeText(this, "No Favorite Channels", Toast.LENGTH_SHORT).show();
+            MDToast.makeText(this, "No Favorite Channels",
+                    MDToast.LENGTH_SHORT,MDToast.TYPE_INFO).show();
         }
 
     @Override

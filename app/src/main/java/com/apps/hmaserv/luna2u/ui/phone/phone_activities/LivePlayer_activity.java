@@ -12,6 +12,7 @@ import android.view.Surface;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.apps.hmaserv.luna2u.NewApplication;
 import com.apps.hmaserv.luna2u.R;
@@ -41,6 +42,7 @@ import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
 import com.google.android.exoplayer2.video.VideoRendererEventListener;
+import com.valdesekamdem.library.mdtoast.MDToast;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -63,7 +65,8 @@ public class LivePlayer_activity extends AppCompatActivity implements
 
     public static final String VLC_PackageName="org.videolan.vlc";
     public String Video_Url;
-    public static final String VLC_Link="https://play.google.com/store/apps/details?id=" + VLC_PackageName;
+    public static final String VLC_Link="https://play.google.com/store/apps/details?id="
+            + VLC_PackageName;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -150,7 +153,8 @@ public class LivePlayer_activity extends AppCompatActivity implements
             pm.getPackageInfo(uri, PackageManager.GET_ACTIVITIES);
             return true;
         } catch (PackageManager.NameNotFoundException e) {
-
+            MDToast.makeText(this, "VLC App Not Installed.",
+                    MDToast.LENGTH_SHORT,MDToast.TYPE_INFO).show();
         }
 
         return false;

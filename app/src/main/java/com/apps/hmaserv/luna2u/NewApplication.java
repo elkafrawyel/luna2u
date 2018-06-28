@@ -2,12 +2,9 @@ package com.apps.hmaserv.luna2u;
 
 import android.app.Application;
 import android.content.Context;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
-import android.widget.Toast;
+import android.support.multidex.MultiDex;
 
 import com.apps.hmaserv.luna2u.data.local.PreferencesHelper;
-import com.apps.hmaserv.luna2u.utils.CommonMethods;
 import com.facebook.stetho.Stetho;
 
 public class NewApplication extends Application {
@@ -32,4 +29,10 @@ public class NewApplication extends Application {
         return mInstance.getApplicationContext();
     }
 
+
+    @Override
+    protected void attachBaseContext(Context base) {
+        super.attachBaseContext(base);
+        MultiDex.install(this);
+    }
 }

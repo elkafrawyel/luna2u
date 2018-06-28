@@ -37,6 +37,10 @@
             </intent-filter>
         </activity>
         <activity android:name=".ui.tv.tv_activities.TV_LoginActivity" />
+        <activity android:name=".ui.tv.tv_activities.TV_LiveActivity" />
+
+
+
         <activity
             android:name=".ui.phone.phone_activities.Splash_activity"
             android:theme="@style/AppTheme" />
@@ -70,7 +74,6 @@
             android:name=".ui.phone.phone_activities.Favorite_activity"
             android:label="@string/title_activity_favorite_activity"
             android:theme="@style/AppTheme" />
-        <activity android:name=".ui.tv.tv_activities.TV_LiveActivity" />
     </application>
 
 </manifest>

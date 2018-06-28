@@ -98,9 +98,10 @@ public class InformationDialog extends Dialog
     @Override
     public void onSuccess(String result) throws JSONException {
         JSONObject object=new JSONObject(result);
-        Email.setText("Email : "+object.getString("email"));
-        Status.setText("Status : "+object.getString("status"));
-        Expires.setText("Expires On : "+getDateCurrentTimeZone(Long.parseLong(object.getString("expires"))));
+        Email.setText(mContext.getString(R.string.email).concat(object.getString("email")));
+        Status.setText(mContext.getString(R.string.status).concat(object.getString("status")));
+        Expires.setText(mContext.getString(R.string.expires).concat(getDateCurrentTimeZone
+                (Long.parseLong(object.getString("expires")))));
     }
 
     private String getDateCurrentTimeZone(long timestamp) {

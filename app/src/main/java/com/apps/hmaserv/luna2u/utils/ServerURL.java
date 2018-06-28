@@ -5,8 +5,6 @@ public class ServerURL {
     public static final int DEVICE_TYPE_TV = 1;
     public static final int DEVICE_TYPE_TABLET = 2;
 
-
-
     public static final String AllChannels="https://luna2u.com/api/channels/";
     public static final String LiveGroups_Url="https://luna2u.com/api/groups/";
     public static final String LiveChannels_Url="https://luna2u.com/api/group/";

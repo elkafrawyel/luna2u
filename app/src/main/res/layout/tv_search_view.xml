@@ -11,7 +11,7 @@
         android:layout_marginEnd="96dp"
         android:layout_marginStart="96dp"
         android:layout_marginTop="12dp"
-        android:background="@drawable/search_et_bakground"
+        android:background="@drawable/search_bakground"
         android:drawablePadding="16dp"
         android:drawableStart="@drawable/ic_search_white_36dp"
         android:hint="Search"

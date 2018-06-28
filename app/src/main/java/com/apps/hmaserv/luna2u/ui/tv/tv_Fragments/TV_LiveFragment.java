@@ -230,6 +230,8 @@ public class TV_LiveFragment extends BrowseFragment {
         //3 category title
         //4 first category header
 
+
+        //handling header items clicks
         getHeadersFragment().setOnHeaderClickedListener(new HeadersFragment.OnHeaderClickedListener() {
             @Override
             public void onHeaderClicked(RowHeaderPresenter.ViewHolder viewHolder, Row row) {
@@ -241,6 +243,8 @@ public class TV_LiveFragment extends BrowseFragment {
 
             }
         });
+
+        //handling header items selection
     }
 
     private static class LiveFragmentFactory extends FragmentFactory {
