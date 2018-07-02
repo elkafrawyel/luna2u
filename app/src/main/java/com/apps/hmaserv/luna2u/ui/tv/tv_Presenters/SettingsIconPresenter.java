@@ -10,7 +10,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.apps.hmaserv.luna2u.R;
-import com.apps.hmaserv.luna2u.ui.tv.tv_Models.SettingCard;
+import com.apps.hmaserv.luna2u.ui.tv.tv_Models.TV_SettingCard;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -45,7 +45,7 @@ public class SettingsIconPresenter extends Presenter {
     @Override
     public void onBindViewHolder(Presenter.ViewHolder viewHolder, Object item) {
         ViewHolder vh = (ViewHolder) viewHolder;
-        SettingCard settingCard = (SettingCard) item;
+        TV_SettingCard settingCard = (TV_SettingCard) item;
 
         vh.settingText.setText(settingCard.getSettingLabel());
         vh.settingIcon.setImageResource(settingCard.getIconResourceId());

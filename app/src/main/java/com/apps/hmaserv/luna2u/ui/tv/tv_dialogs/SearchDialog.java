@@ -20,7 +20,7 @@ import com.android.volley.VolleyError;
 import com.apps.hmaserv.luna2u.NewApplication;
 import com.apps.hmaserv.luna2u.R;
 import com.apps.hmaserv.luna2u.data.model.LiveChannelsModel;
-import com.apps.hmaserv.luna2u.ui.tv.tv_adapters.SearchAdapter;
+import com.apps.hmaserv.luna2u.ui.tv.tv_adapters.TV_SearchAdapter;
 import com.apps.hmaserv.luna2u.utils.Handler;
 import com.apps.hmaserv.luna2u.utils.ServerURL;
 import com.apps.hmaserv.luna2u.utils.VolleySingleton;
@@ -36,7 +36,7 @@ import butterknife.ButterKnife;
 
 public class SearchDialog extends Dialog{
     private Context mContext;
-    private SearchAdapter adapter;
+    private TV_SearchAdapter adapter;
     @BindView(R.id.search_et)
     EditText search;
     @BindView(R.id.search_result_rv)
@@ -53,7 +53,7 @@ public class SearchDialog extends Dialog{
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         SearchDialog.this.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         this.setCancelable(true);
-        setContentView(R.layout.tv_search_view);
+        setContentView(R.layout.dialog_search_tv);
         ButterKnife.bind(this);
         getWindow().setLayout(WindowManager.LayoutParams.MATCH_PARENT,
                 WindowManager.LayoutParams.MATCH_PARENT);
@@ -106,7 +106,7 @@ public class SearchDialog extends Dialog{
                                     String group = object.getString("group");
                                     Channels.add(new LiveChannelsModel(id, name, group, url, false));
                                 }
-                                adapter=new SearchAdapter(Channels);
+                                adapter=new TV_SearchAdapter(Channels);
                                 search_rv.setAdapter(adapter);
                             }
                         }

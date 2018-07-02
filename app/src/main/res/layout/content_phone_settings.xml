@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/colorPrimaryDark">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <TextView
+            android:id="@+id/phone_settings_activity_player"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="16dp"
+            android:textColor="@color/text_color"
+            android:text="Player"
+            android:textSize="18sp"
+            android:layout_marginStart="18dp"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginStart="12dp">
+            <RadioButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/exo_radio"
+                android:text="Default Player"
+                android:textColor="@color/text_color"
+                android:textSize="16sp"
+                android:layout_marginTop="8dp"
+                android:layout_marginStart="12dp"
+                android:layout_marginBottom="8dp"/>
+
+            <RadioButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/vlc_radio"
+                android:text="VLC Player"
+                android:textColor="@color/text_color"
+                android:textSize="16sp"
+                android:layout_marginTop="8dp"
+                android:layout_marginStart="12dp"
+                android:layout_marginBottom="8dp"/>
+        </LinearLayout>
+        </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0.8dp"
+        android:layout_marginStart="56dp"
+        android:layout_marginEnd="16dp"
+        android:background="@color/colorWhiteDivider"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <TextView
+            android:id="@+id/phone_settings_activity_channel_image"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="16dp"
+            android:textColor="@color/text_color"
+            android:text="Channel View"
+            android:textSize="18sp"
+            android:layout_marginStart="18dp"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginStart="12dp">
+            <RadioButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/withImage_radio"
+                android:text="With Image"
+                android:textColor="@color/text_color"
+                android:textSize="16sp"
+                android:layout_marginTop="8dp"
+                android:layout_marginStart="12dp"
+                android:layout_marginBottom="8dp"/>
+
+            <RadioButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/withoutImage_radio"
+                android:text="WithOut Image"
+                android:textColor="@color/text_color"
+                android:textSize="16sp"
+                android:layout_marginTop="8dp"
+                android:layout_marginStart="12dp"
+                android:layout_marginBottom="8dp"/>
+        </LinearLayout>
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0.8dp"
+        android:layout_marginStart="56dp"
+        android:layout_marginEnd="16dp"
+        android:background="@color/colorWhiteDivider"/>
+
+    <TextView
+        android:id="@+id/phone_settings_activity_info"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:textColor="@color/text_color"
+        android:text="Information"
+        android:textSize="18sp"
+        android:drawableStart="@drawable/info_24"
+        android:drawablePadding="16dp"/>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0.8dp"
+        android:layout_marginStart="56dp"
+        android:layout_marginEnd="16dp"
+        android:background="@color/colorWhiteDivider"/>
+
+    <TextView
+        android:id="@+id/phone_settings_activity_log_out"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:textColor="@color/text_color"
+        android:text="Log out"
+        android:textSize="18sp"
+        android:drawableStart="@drawable/ic_exit_to_app_white_24dp"
+        android:drawablePadding="16dp"/>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0.8dp"
+        android:layout_marginStart="56dp"
+        android:layout_marginEnd="16dp"
+        android:background="@color/colorWhiteDivider"/>
+
+</LinearLayout>

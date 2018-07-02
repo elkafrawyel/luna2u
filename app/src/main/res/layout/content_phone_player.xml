@@ -1,0 +1,27 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/player_root_view"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.phone.phone_activities.Player">
+
+    <com.google.android.exoplayer2.ui.SimpleExoPlayerView
+        android:id="@+id/video_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:resize_mode="fill" />
+
+    <ProgressBar
+        android:id="@+id/live_player_loading_pb"
+        android:layout_width="wrap_content"
+        android:visibility="visible"
+        android:layout_centerInParent="true"
+        android:layout_height="wrap_content"
+        />
+
+    <include
+        layout="@layout/dialog_channel_info_tv"
+        android:visibility="gone" />
+
+</RelativeLayout>

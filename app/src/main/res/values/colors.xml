@@ -11,5 +11,6 @@
     <color name="text_color">#ECBE11</color>
     <color name="login_background_color">#FFFFFF</color>
     <color name="CardView_color">#FF37474F</color>
+    <color name="sub_menu_category_background_color">#E6303030</color>
 
 </resources>

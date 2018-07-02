@@ -17,6 +17,7 @@ public class PreferencesHelper {
     private static final String PREF_KEY_IS_SIGNED = "KEY_IS_SIGNED";
     private static final String PREF_KEY_PLAYER = "KEY_PLAYER";
     private static final String PREF_KEY_ASK = "KEY_ASK";
+    private static final String PREF_KEY_CHANNEL_IMAGE = "KEY_CHANNEL_IMAGE";
 
     public PreferencesHelper(Context context) {
         mSharedPreferences = context.getSharedPreferences(PREF_FILE_NAME, Context.MODE_PRIVATE);
@@ -32,6 +33,12 @@ public class PreferencesHelper {
 
     public void setUsername(String username) {
         mSharedPreferences.edit().putString(PREF_KEY_USERNAME, username).apply();
+    }
+
+    //1 use normal image
+    //0 use no image
+    public void setChannelImage(String channelImage) {
+        mSharedPreferences.edit().putString(PREF_KEY_CHANNEL_IMAGE, channelImage).apply();
     }
 
     public void setPlayer(String player) {
@@ -60,6 +67,10 @@ public class PreferencesHelper {
 
     public String getUsername() {
         return mSharedPreferences.getString(PREF_KEY_USERNAME, null);
+    }
+
+    public String getChannelImage() {
+        return mSharedPreferences.getString(PREF_KEY_CHANNEL_IMAGE, null);
     }
 
     public String getPassword() {

@@ -37,41 +37,38 @@
             </intent-filter>
         </activity>
         <activity android:name=".ui.tv.tv_activities.TV_LoginActivity" />
-        <activity android:name=".ui.tv.tv_activities.TV_LiveActivity" />
-
-
-
+        <activity android:name=".ui.tv.tv_activities.TV_MainActivity" />
         <activity
-            android:name=".ui.phone.phone_activities.Splash_activity"
+            android:name=".ui.phone.phone_activities.Phone_Splash"
             android:theme="@style/AppTheme" />
         <activity
-            android:name=".ui.phone.phone_activities.LiveGroups_activity"
+            android:name=".ui.phone.phone_activities.Phone_Groups"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".ui.phone.phone_activities.LiveChannels_activity"
+            android:name=".ui.phone.phone_activities.Phone_Channels"
             android:theme="@style/AppTheme" />
         <activity
-            android:name=".ui.phone.phone_activities.LiveSettings_activity"
-            android:parentActivityName=".ui.phone.phone_activities.LiveGroups_activity"
+            android:name=".ui.phone.phone_activities.Phone_Settings"
+            android:parentActivityName=".ui.phone.phone_activities.Phone_Groups"
             android:theme="@style/AppTheme" />
         <activity
-            android:name=".ui.phone.phone_activities.LivePlayer_activity"
+            android:name=".ui.phone.phone_activities.Player"
             android:configChanges="orientation|keyboardHidden"
             android:label="@string/title_activity_live_player"
-            android:parentActivityName=".ui.phone.phone_activities.LiveChannels_activity"
+            android:parentActivityName=".ui.phone.phone_activities.Phone_Channels"
             android:screenOrientation="landscape"
             android:theme="@style/AppTheme" />
         <activity
-            android:name=".ui.phone.phone_activities.Login_activity"
+            android:name=".ui.phone.phone_activities.Phone_Login"
             android:label="@string/title_activity_login"
             android:theme="@style/AppTheme" />
         <activity
-            android:name=".ui.phone.phone_activities.Information_activity"
+            android:name=".ui.phone.phone_activities.Phone_Information"
             android:label="@string/title_activity_information"
-            android:parentActivityName=".ui.phone.phone_activities.LiveSettings_activity"
+            android:parentActivityName=".ui.phone.phone_activities.Phone_Settings"
             android:theme="@style/AppTheme" />
         <activity
-            android:name=".ui.phone.phone_activities.Favorite_activity"
+            android:name=".ui.phone.phone_activities.Phone_Favorite"
             android:label="@string/title_activity_favorite_activity"
             android:theme="@style/AppTheme" />
     </application>

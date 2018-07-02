@@ -17,8 +17,8 @@ import com.apps.hmaserv.luna2u.R;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-import static com.apps.hmaserv.luna2u.ui.phone.phone_dialogs.ChoosePlayerDialog.EXO;
-import static com.apps.hmaserv.luna2u.ui.phone.phone_dialogs.ChoosePlayerDialog.VLC;
+import static com.apps.hmaserv.luna2u.ui.phone.phone_dialogs.Phone_ChoosePlayerDialog.EXO;
+import static com.apps.hmaserv.luna2u.ui.phone.phone_dialogs.Phone_ChoosePlayerDialog.VLC;
 
 
 public class PlayerDialog extends Dialog{
@@ -40,7 +40,7 @@ public class PlayerDialog extends Dialog{
         PlayerDialog.this.getWindow().setBackgroundDrawable(
                 new ColorDrawable(Color.TRANSPARENT));
         this.setCancelable(true);
-        setContentView(R.layout.choose_player_tv);
+        setContentView(R.layout.choose_tv_player);
         ButterKnife.bind(this);
         getWindow().setLayout(WindowManager.LayoutParams.WRAP_CONTENT,
                 WindowManager.LayoutParams.WRAP_CONTENT);

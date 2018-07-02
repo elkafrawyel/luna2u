@@ -11,7 +11,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.apps.hmaserv.luna2u.R;
-import com.apps.hmaserv.luna2u.ui.tv.tv_Models.IconHeaderItem;
+import com.apps.hmaserv.luna2u.ui.tv.tv_Models.TV_IconHeaderItem;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -20,26 +20,28 @@ public class IconHeaderItemPresenter extends RowHeaderPresenter {
 
     private float mUnselectedAlpha;
 
+
     public IconHeaderItemPresenter() {
+
     }
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup viewGroup) {
         mUnselectedAlpha = viewGroup.getResources().getFraction(R.fraction.lb_browse_header_unselect_alpha, 1, 1);
         LayoutInflater inflater = (LayoutInflater) viewGroup.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View view = inflater.inflate(R.layout.icon_header_item, null);
+        final View view = inflater.inflate(R.layout.icon_header_item, null);
         return new ViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(Presenter.ViewHolder viewHolder, Object o) {
-        IconHeaderItem iconHeaderItem = (IconHeaderItem) ((PageRow) o).getHeaderItem();
+        TV_IconHeaderItem iconHeaderItem = (TV_IconHeaderItem) ((PageRow) o).getHeaderItem();
         final ViewHolder vh = (ViewHolder) viewHolder;
-        if (iconHeaderItem.getType() == IconHeaderItem.TYPE_FAVORITE) {
+        if (iconHeaderItem.getType() == 1) {
             vh.headerName.setTextColor(vh.headerName.getResources().getColor(R.color.text_color));
             vh.headerIcon.setImageResource(R.drawable.ic_favorite_red_800_24dp);
             vh.headerIcon.setVisibility(View.VISIBLE);
-        } else if (iconHeaderItem.getType() == IconHeaderItem.TYPE_SETTINGS) {
+        } else if (iconHeaderItem.getType() == 0) {
             vh.headerName.setTextColor(vh.headerName.getResources().getColor(R.color.text_color));
             vh.headerIcon.setImageResource(R.drawable.ic_settings_white_24dp);
             vh.headerIcon.setVisibility(View.VISIBLE);
@@ -57,7 +59,11 @@ public class IconHeaderItemPresenter extends RowHeaderPresenter {
         // no op
     }
 
-
+    protected void onSelectLevelChanged(RowHeaderPresenter.ViewHolder holder) {
+        // this is a temporary fix
+        holder.view.setAlpha(mUnselectedAlpha + holder.getSelectLevel() *
+                (1.0f - mUnselectedAlpha));
+    }
 
     public class ViewHolder extends RowHeaderPresenter.ViewHolder {
         @BindView(R.id.header_icon)
@@ -67,12 +73,6 @@ public class IconHeaderItemPresenter extends RowHeaderPresenter {
         public ViewHolder(View view) {
             super(view);
             ButterKnife.bind(this, view);
-
-            if (view.hasFocus()){
-                headerName.setTextColor(headerName.getResources().getColor(R.color.text_color));
-            }else {
-                headerName.setTextColor(headerName.getResources().getColor(R.color.colorWhite));
-            }
         }
     }
 }

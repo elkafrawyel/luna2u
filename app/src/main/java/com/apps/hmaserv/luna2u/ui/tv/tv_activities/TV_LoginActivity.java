@@ -120,9 +120,9 @@ public class TV_LoginActivity extends Activity
 
         if (code.equals("0")&&status.equals("success")&&message.equals("Valid")){
             NewApplication.getPreferencesHelper().setActivationCode(Code_fromUser);
-            startActivity(new Intent(TV_LoginActivity.this, TV_LiveActivity.class));
+            startActivity(new Intent(TV_LoginActivity.this, TV_MainActivity.class));
             TV_LoginActivity.this.finish();
-        }else if (code.equals("2")&&status.equals("error")&&message.equals("Subscription expired")){
+        }else if (code.equals("1")&&status.equals("error")&&message.equals("Invalid subscription")){
             MDToast.makeText(this, "Make Sure You have a correct Code!!",
                     Toast.LENGTH_SHORT,MDToast.TYPE_WARNING).show();
         }

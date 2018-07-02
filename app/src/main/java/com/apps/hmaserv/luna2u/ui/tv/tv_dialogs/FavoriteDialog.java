@@ -13,7 +13,7 @@ import android.view.WindowManager;
 
 import com.apps.hmaserv.luna2u.R;
 import com.apps.hmaserv.luna2u.data.model.LiveChannelsModel;
-import com.apps.hmaserv.luna2u.ui.tv.tv_adapters.FavoritesAdapter;
+import com.apps.hmaserv.luna2u.ui.tv.tv_adapters.TV_FavoritesAdapter;
 
 import java.util.ArrayList;
 
@@ -22,7 +22,7 @@ import butterknife.ButterKnife;
 
 public class FavoriteDialog extends Dialog {
     private Context mContext;
-    private FavoritesAdapter adapter;
+    private TV_FavoritesAdapter adapter;
     @BindView(R.id.search_result_rv)
     RecyclerView search_rv;
     ArrayList<LiveChannelsModel> Channels=new ArrayList<>();
@@ -38,7 +38,7 @@ public class FavoriteDialog extends Dialog {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         FavoriteDialog.this.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         this.setCancelable(true);
-        setContentView(R.layout.tv_favorite_view);
+        setContentView(R.layout.dialog_favorite_tv);
         ButterKnife.bind(this);
         getWindow().setLayout(WindowManager.LayoutParams.MATCH_PARENT,
                 WindowManager.LayoutParams.MATCH_PARENT);
@@ -46,7 +46,7 @@ public class FavoriteDialog extends Dialog {
 
         search_rv.setHasFixedSize(true);
         search_rv.setLayoutManager(new GridLayoutManager(mContext,3));
-        adapter=new FavoritesAdapter(Channels);
+        adapter=new TV_FavoritesAdapter(Channels);
         search_rv.setAdapter(adapter);
     }
 

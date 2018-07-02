@@ -13,9 +13,11 @@ import android.widget.Toast;
 import com.apps.hmaserv.luna2u.R;
 import com.apps.hmaserv.luna2u.data.DataViewModel;
 import com.apps.hmaserv.luna2u.data.model.LiveChannelsModel;
-import com.apps.hmaserv.luna2u.ui.phone.phone_activities.LivePlayer_activity;
+import com.apps.hmaserv.luna2u.ui.phone.phone_activities.Player;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
+
+import static com.apps.hmaserv.luna2u.ui.tv.tv_Fragments.TV_MainFragment.mCurrentGroupId;
 
 
 public class ChannelsCardPresenter extends Presenter {
@@ -117,8 +119,11 @@ public class ChannelsCardPresenter extends Presenter {
         ((ViewHolder) viewHolder).mCardView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent i = new Intent(mContext, LivePlayer_activity.class);
-                i.putExtra("url", channel.getUrl());
+                Intent i = new Intent(mContext, Player.class);
+                i.putExtra("url",channel.getUrl());
+                i.putExtra("group_id",mCurrentGroupId);
+                i.putExtra("group_name",channel.getGroup());
+                i.putExtra("name",channel.getName());
                 mContext.startActivity(i);
             }
         });

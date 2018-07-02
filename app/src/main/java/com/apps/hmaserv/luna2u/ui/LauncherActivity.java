@@ -6,8 +6,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
 import com.apps.hmaserv.luna2u.NewApplication;
-import com.apps.hmaserv.luna2u.ui.phone.phone_activities.Splash_activity;
-import com.apps.hmaserv.luna2u.ui.tv.tv_activities.TV_LiveActivity;
+import com.apps.hmaserv.luna2u.ui.phone.phone_activities.Phone_Splash;
+import com.apps.hmaserv.luna2u.ui.tv.tv_activities.TV_MainActivity;
 import com.apps.hmaserv.luna2u.ui.tv.tv_activities.TV_LoginActivity;
 import com.apps.hmaserv.luna2u.utils.CommonMethods;
 import com.apps.hmaserv.luna2u.utils.ServerURL;
@@ -50,11 +50,11 @@ public class LauncherActivity extends AppCompatActivity {
                 startActivity(new Intent(LauncherActivity.this, TV_LoginActivity.class));
                 LauncherActivity.this.finish();
             } else {
-                startActivity(new Intent(LauncherActivity.this, TV_LiveActivity.class));
+                startActivity(new Intent(LauncherActivity.this, TV_MainActivity.class));
                 LauncherActivity.this.finish();
             }
         } else {
-            startActivity(new Intent(LauncherActivity.this, Splash_activity.class));
+            startActivity(new Intent(LauncherActivity.this, Phone_Splash.class));
             LauncherActivity.this.finish();
         }
     }
