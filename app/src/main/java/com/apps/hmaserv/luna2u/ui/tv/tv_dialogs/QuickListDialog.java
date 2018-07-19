@@ -45,15 +45,18 @@ public class QuickListDialog extends Dialog implements TV_QuickListAdapter.IItem
     private TV_QuickListAdapter adapter;
     @BindView(R.id.quick_list_rv)
     RecyclerView rv;
-    private ArrayList<LiveChannelsModel>Channels=new ArrayList<>();
+    private ArrayList<LiveChannelsModel> Channels = new ArrayList<>();
     String Group_Id;
     Context mContext;
     ISelectedItem iSelectedItem;
-    public QuickListDialog(@NonNull Context context,String Group_Id,ISelectedItem iSelectedItem) {
+
+    public QuickListDialog(@NonNull Context context, String Group_Id,
+                           ISelectedItem iSelectedItem, ArrayList<LiveChannelsModel> Channels) {
         super(context);
-        mContext=context;
-        this.Group_Id=Group_Id;
-        this.iSelectedItem=iSelectedItem;
+        mContext = context;
+        this.Group_Id = Group_Id;
+        this.iSelectedItem = iSelectedItem;
+        this.Channels = Channels;
     }
 
     @Override
@@ -73,88 +76,35 @@ public class QuickListDialog extends Dialog implements TV_QuickListAdapter.IItem
     @Override
     public void onAttachedToWindow() {
         super.onAttachedToWindow();
-        String Code=NewApplication.getPreferencesHelper().getActivationCode();
-        loadData(Code);
+        loadData();
     }
 
-    private void loadData(String code) {
+    private void loadData() {
 
-        Channels.clear();
-        if (Group_Id.equals("1")){
+        if (Group_Id.equals("1")) {
+            Channels.clear();
             Channels.addAll(LunaDatabase.getInstance(mContext).getUserDao().getAllChannels());
-            adapter=new TV_QuickListAdapter(Channels,QuickListDialog.this);
+            adapter = new TV_QuickListAdapter(Channels, QuickListDialog.this);
             rv.setAdapter(adapter);
             rv.setHasFixedSize(true);
             rv.setLayoutManager(new LinearLayoutManager(mContext));
-        }else {
-            String Channels_Url=ServerURL.LiveChannels_Url.concat(code).concat("/")
-                    .concat(String.valueOf(Group_Id));
-            RequestQueue mRequestQueue = VolleySingleton.getInstance().getRequestQueue();
-            mRequestQueue.add(
-                    VolleySingleton.getInstance().makeStringResponse(Channels_Url,
-                            new VolleySingleton.VolleyCallback() {
-                                @Override
-                                public void onSuccess(String result) throws JSONException {
-                                    JSONObject Groups = new JSONObject(result);
-                                    JSONArray array = Groups.getJSONArray("channels");
-
-                                    for (int i = 0; i < array.length(); i++) {
-
-                                        LiveChannelsModel model = new Gson().fromJson(array.get(i)
-                                                .toString(), LiveChannelsModel.class);
-                                        LiveChannelsModel temp = LunaDatabase.getInstance(mContext)
-                                                .getUserDao().getChannelById(model.getId());
-                                        if (temp != null)
-                                            model.setIs_favorite(true);
-
-                                        Channels.add(model);
-                                    }
-                                    adapter=new TV_QuickListAdapter(Channels,QuickListDialog.this);
-                                    rv.setAdapter(adapter);
-                                    rv.setHasFixedSize(true);
-                                    rv.setLayoutManager(new LinearLayoutManager(mContext));
-                                }
-                            }, new VolleySingleton.JsonVolleyCallbackError() {
-                                @Override
-                                public void onError(VolleyError error) {
-
-                                }
-                            })
-            ).setRetryPolicy(new RetryPolicy() {
-                @Override
-                public int getCurrentTimeout() {
-                    return 2000;
-                }
-
-                @Override
-                public int getCurrentRetryCount() {
-                    return 0;
-                }
-
-                @Override
-                public void retry(VolleyError error) throws VolleyError {
-
-                }
-            });
+        } else {
+            adapter = new TV_QuickListAdapter(Channels, QuickListDialog.this);
+            rv.setAdapter(adapter);
+            rv.setHasFixedSize(true);
+            rv.setLayoutManager(new LinearLayoutManager(mContext));
 
         }
-
-
-
-
-
-
-
     }
 
     @Override
     public void ItemClicked(int position) {
-        LiveChannelsModel model=Channels.get(position);
+        LiveChannelsModel model = Channels.get(position);
         iSelectedItem.SelectedItem(model);
         QuickListDialog.this.dismiss();
     }
 
-    public interface ISelectedItem{
+    public interface ISelectedItem {
         void SelectedItem(LiveChannelsModel channel);
     }
 }

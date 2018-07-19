@@ -11,10 +11,6 @@ public class ServerURL {
     public static final String Code_Url="https://luna2u.com/api/check/";
     public static final String Information_Url="https://luna2u.com/api/info/";
 
-    String Code="2057573991";
-
-    String Code_Single="1862217885";
-
-    String Old_Code="2449725519";
+    String Code="2299734573";
 
 }

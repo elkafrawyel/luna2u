@@ -93,6 +93,7 @@ public class TV_QuickListAdapter extends
             }
         });
 
+        holder.itemCard.getBackground().setAlpha(200);
     }
 
     public int getCurrentPosition() {
