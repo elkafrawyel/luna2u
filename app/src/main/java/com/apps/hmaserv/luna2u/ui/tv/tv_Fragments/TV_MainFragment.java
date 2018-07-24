@@ -1,12 +1,12 @@
 package com.apps.hmaserv.luna2u.ui.tv.tv_Fragments;
 
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v17.leanback.app.BackgroundManager;
-import android.support.v17.leanback.app.BrowseFragment;
 import android.support.v17.leanback.app.BrowseSupportFragment;
-import android.support.v17.leanback.app.HeadersFragment;
 import android.support.v17.leanback.app.HeadersSupportFragment;
 import android.support.v17.leanback.widget.ArrayObjectAdapter;
 import android.support.v17.leanback.widget.DividerPresenter;
@@ -20,9 +20,10 @@ import android.support.v17.leanback.widget.Row;
 import android.support.v17.leanback.widget.RowHeaderPresenter;
 import android.support.v17.leanback.widget.SectionRow;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.ContextCompat;
+import android.text.format.DateFormat;
+import android.view.KeyEvent;
 import android.view.View;
-import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.RequestQueue;
@@ -44,39 +45,46 @@ import com.google.gson.Gson;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
+
+import static com.apps.hmaserv.luna2u.utils.VolleySingleton.RequestKey;
 
 public class TV_MainFragment extends BrowseSupportFragment {
     ArrayList<LiveGroupsModel> Groups = new ArrayList<>();
-    ProgressBar progressBar;
     private boolean firstTime = true;
     public static String mCurrentGroupId;
     private final RequestQueue mRequestQueue = VolleySingleton.getInstance().getRequestQueue();
+    BackgroundManager mBackgroundManager;
+    TextView mCurrentTime;
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        progressBar = Objects.requireNonNull(getActivity()).findViewById(R.id.progress_bar);
-        progressBar.setVisibility(View.VISIBLE);
-        setUpUiElements();
+        mCurrentTime= Objects.requireNonNull(getActivity()).findViewById(R.id.tv_CurrentTime);
         LoadDataFromServer();
+        setUpUiElements();
         setUpEventListeners();
     }
 
+
     private void setUpUiElements() {
-        setBadgeDrawable(Objects.requireNonNull(getActivity()).getResources().getDrawable(R.drawable.logo));
+        setBadgeDrawable(Objects.requireNonNull(getActivity())
+                .getResources().getDrawable(R.drawable.logo));
         //setTitle("Luna2u");
-        setHeadersState(HEADERS_ENABLED);
+        setHeadersState(HEADERS_HIDDEN);
         setHeadersTransitionOnBackEnabled(true);
-        setBrandColor(getActivity().getResources().getColor(R.color.CardView_color));
+        setBrandColor(getActivity().getResources().getColor(R.color.colorPrimaryDark));
         setSearchAffordanceColor(getActivity().getResources().getColor(R.color.text_color));
-        BackgroundManager mBackgroundManager = BackgroundManager.getInstance(getActivity());
+        mBackgroundManager = BackgroundManager.getInstance(getActivity());
         mBackgroundManager.attach(getActivity().getWindow());
-        mBackgroundManager.setColor(ContextCompat.getColor(getActivity(),
-                R.color.CardView_color));
         getMainFragmentRegistry().registerFragment(PageRow.class,
-                new LiveFragmentFactory(mBackgroundManager));
+                new LiveFragmentFactory(mBackgroundManager,getContext(),getHeadersSupportFragment(),mCurrentTime));
         setHeaderPresenterSelector(new PresenterSelector() {
             @Override
             public Presenter getPresenter(Object item) {
@@ -84,11 +92,20 @@ public class TV_MainFragment extends BrowseSupportFragment {
                     return new IconHeaderItemPresenter();
                 } else if (item instanceof DividerRow) {
                     return new DividerPresenter();
-                }else
+                } else
                     return new RowHeaderPresenter();
             }
         });
+        prepareEntranceTransition();
 
+    }
+
+    public void myOnKeyDown(int key_code){
+        if (key_code==KeyEvent.KEYCODE_BACK) {
+            setSelectedPosition(0);
+            mCurrentGroupId = "0";
+            setHeadersState(HEADERS_HIDDEN);
+        }
     }
 
     private void setUpEventListeners() {
@@ -100,11 +117,9 @@ public class TV_MainFragment extends BrowseSupportFragment {
             }
         });
 
-
     }
 
     private void LoadDataFromServer() {
-        progressBar.setVisibility(View.VISIBLE);
         final String code = NewApplication.getPreferencesHelper().getActivationCode();
         if (code != null) {
             CheckCodeValidation(code);
@@ -129,7 +144,7 @@ public class TV_MainFragment extends BrowseSupportFragment {
                                             "Your Activation Code is Expired!!",
                                             Toast.LENGTH_SHORT).show();
                                     NewApplication.getPreferencesHelper().clear();
-                                    getActivity().finish();
+                                    Objects.requireNonNull(getActivity()).finish();
                                     getActivity().startActivity(new Intent(getActivity(), TV_LoginActivity.class));
                                 }
                             }
@@ -171,6 +186,8 @@ public class TV_MainFragment extends BrowseSupportFragment {
                                 for (int i = 0; i < array.length(); i++) {
                                     LiveGroupsModel model = new Gson().fromJson(array.get(i)
                                             .toString(), LiveGroupsModel.class);
+
+
                                     Groups.add(model);
                                 }
                                 if (Groups.size() > 0) {
@@ -181,7 +198,6 @@ public class TV_MainFragment extends BrowseSupportFragment {
                             @Override
                             public void onError(VolleyError error) {
                                 Handler.volleyErrorHandler(error, getActivity());
-                                progressBar.setVisibility(View.GONE);
                             }
                         }
                 )
@@ -193,7 +209,6 @@ public class TV_MainFragment extends BrowseSupportFragment {
     private void loadData() {
         mRowsAdapter = new ArrayObjectAdapter(new ListRowPresenter());
         setAdapter(mRowsAdapter);
-        progressBar.setVisibility(View.GONE);
         newCreateRows(Groups);
     }
 
@@ -222,28 +237,28 @@ public class TV_MainFragment extends BrowseSupportFragment {
             mRowsAdapter.add(pageRow1);
         }
 
-        setSelectedPosition(4);
-        mCurrentGroupId=Groups.get(0).getId();
-
         //header items index in the adapter
         // 0 setting
         //1 favorite
         //2 line
         //3 category title
         //4 first category header
+        mCurrentGroupId = Groups.get(0).getId();
 
-
-        if (getHeadersSupportFragment()!=null){
+        if (getHeadersSupportFragment() != null) {
             //handling header items clicks
+
+
+
             getHeadersSupportFragment().setOnHeaderClickedListener(
                     new HeadersSupportFragment.OnHeaderClickedListener() {
                         @Override
                         public void onHeaderClicked(RowHeaderPresenter.ViewHolder viewHolder, Row row) {
                             if (firstTime) {
-                                firstTime = false;
-                            } else {
-                                setSelectedPosition((int) row.getHeaderItem().getId());
-                                mCurrentGroupId=((TV_IconHeaderItem)row.getHeaderItem()).getCategoryId();
+                                firstTime=false;
+                            }else {
+                                setSelectedPosition(getHeadersSupportFragment().getSelectedPosition());
+                                mCurrentGroupId = ((TV_IconHeaderItem) row.getHeaderItem()).getCategoryId();
                             }
                         }
                     });
@@ -252,41 +267,89 @@ public class TV_MainFragment extends BrowseSupportFragment {
                 @Override
                 public void onHeaderSelected(RowHeaderPresenter.ViewHolder viewHolder, Row row) {
                     if (firstTime) {
-                        firstTime = false;
-                    } else {
-                        setSelectedPosition((int) row.getHeaderItem().getId());
-                        mCurrentGroupId=((TV_IconHeaderItem)row.getHeaderItem()).getCategoryId();
-
+                        firstTime=false;
+                        startEntranceTransition();
+                        setSelectedPosition(4);
+                    }else {
+                        int pos=getHeadersSupportFragment().getSelectedPosition();
+                        setSelectedPosition(pos);
+                        mCurrentGroupId = ((TV_IconHeaderItem) row.getHeaderItem()).getCategoryId();
                     }
                 }
             });
         }
+    }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        //when back from logout window
+        mBackgroundManager.setBitmap(BitmapFactory.decodeResource(Objects.requireNonNull(getContext()).getResources(), R.drawable.channels_tv_background));
     }
 
     private static class LiveFragmentFactory extends FragmentFactory {
         private final BackgroundManager mBackgroundManager;
-
-        LiveFragmentFactory(BackgroundManager backgroundManager) {
+        private Context mContext;
+        HeadersSupportFragment headersSupportFragment;
+        TextView mCurrentTime;
+        LiveFragmentFactory(BackgroundManager backgroundManager, Context mContext,
+                            HeadersSupportFragment headersSupportFragment,TextView mCurrentTime) {
             this.mBackgroundManager = backgroundManager;
+            this.mContext=mContext;
+            this.headersSupportFragment=headersSupportFragment;
+            this.mCurrentTime=mCurrentTime;
         }
 
         @Override
         public Fragment createFragment(Object rowObj) {
             Row row = (Row) rowObj;
             TV_IconHeaderItem iconHeaderItem = (TV_IconHeaderItem) row.getHeaderItem();
-            mBackgroundManager.setDrawable(null);
+            mBackgroundManager.setBitmap(BitmapFactory.decodeResource(mContext.getResources(), R.drawable.channels_tv_background));
 
-            if (iconHeaderItem.getId() ==0) {
-                return new TV_SettingsFragment();
+            if (iconHeaderItem.getId() == 0) {
+                TV_SettingsFragment settingsFragment=new TV_SettingsFragment();
+                settingsFragment.iFavoriteClicked=new TV_SettingsFragment.IFavoriteClicked() {
+                    @Override
+                    public void Handle() {
+                        headersSupportFragment.setSelectedPosition(1);
+                    }
+                };
+                ShowTime();
+                return settingsFragment;
             } else {
                 Bundle bundle = new Bundle();
                 bundle.putString("category_id", iconHeaderItem.getCategoryId());
                 bundle.putLong("header_id", iconHeaderItem.getCategoryIndex());
                 TV_ChannelsFragment channelsFragment = new TV_ChannelsFragment();
                 channelsFragment.setArguments(bundle);
+                HideTime();
                 return channelsFragment;
             }
+        }
+
+        void ShowTime(){
+            mCurrentTime.setText(getDateFromTimeStamp(DateFormat_4));
+            mCurrentTime.setVisibility(View.VISIBLE);
+        }
+
+        private void HideTime(){
+            mCurrentTime.setVisibility(View.GONE);
+        }
+
+        //Wed, Jul 4, 01
+        private static final String DateFormat_1 = "EEE, MMM d, yyyy";
+        //12:08 PM
+        public static final String DateFormat_2 = "h:mm a";
+        //Wed, 4 Jul 2001 12:08:56
+        public static final String DateFormat_3 = "EEE, d MMM yyyy HH:mm:ss";
+        //Wed, 4 Jul 2001 12:08
+        public static final String DateFormat_4 = "EEE, d MMM yyyy HH:mm a";
+
+
+        private String getDateFromTimeStamp(String format) {
+            Calendar cal = Calendar.getInstance(Locale.ENGLISH);
+            cal.setTimeInMillis(System.currentTimeMillis());
+            return DateFormat.format(format, cal).toString();
         }
     }
 

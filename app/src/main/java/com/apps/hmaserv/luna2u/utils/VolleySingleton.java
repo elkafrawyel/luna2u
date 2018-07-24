@@ -30,7 +30,7 @@ public class VolleySingleton {
     private Context context;
     private final static long CacheHitRefresh = 60 * 60 * 1000;
     private final static long CacheExpired = 2 * 24 * 60 * 60 * 1000;//2 days
-
+    public static String RequestKey="Luna2u";
     @SuppressLint("StaticFieldLeak")
     private static VolleySingleton mInstance=null;
     private RequestQueue mRequestQueue;

@@ -2,6 +2,7 @@ package com.apps.hmaserv.luna2u.ui.tv.tv_adapters;
 
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
+import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.CardView;
@@ -35,6 +36,7 @@ public class TV_QuickListAdapter extends
 
     private int currentPosition;
     IItemClickHandler iItemClickHandler;
+    Context context;
     public TV_QuickListAdapter(ArrayList<LiveChannelsModel> channels,IItemClickHandler iItemClickHandler) {
         this.iItemClickHandler=iItemClickHandler;
         this.Channels = channels;
@@ -44,12 +46,13 @@ public class TV_QuickListAdapter extends
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         viewModel=new DataViewModel(parent.getContext());
+        context=parent.getContext();
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.tv_quick_item, parent, false);
         return new ViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull final ViewHolder holder, final int position) {
+    public void onBindViewHolder(@NonNull final ViewHolder holder, int position) {
 
         final LiveChannelsModel model = Channels.get(position);
 
@@ -60,9 +63,12 @@ public class TV_QuickListAdapter extends
         scaleUpX.setDuration(200);
         scaleUpY.setDuration(200);
 
-        ObjectAnimator elevationDownAnimator = ObjectAnimator.ofFloat(holder.itemCard, "cardElevation", 8);
-        ObjectAnimator scaleDownX = ObjectAnimator.ofFloat(holder.itemCard, "scaleX", 1f);
-        ObjectAnimator scaleDownY = ObjectAnimator.ofFloat(holder.itemCard, "scaleY", 1f);
+        ObjectAnimator elevationDownAnimator = ObjectAnimator.ofFloat(holder.itemCard,
+                "cardElevation", 8);
+        ObjectAnimator scaleDownX = ObjectAnimator.ofFloat(holder.itemCard,
+                "scaleX", 1f);
+        ObjectAnimator scaleDownY = ObjectAnimator.ofFloat(holder.itemCard,
+                "scaleY", 1f);
         elevationDownAnimator.setDuration(200);
         scaleDownX.setDuration(200);
         scaleDownY.setDuration(200);
@@ -80,24 +86,24 @@ public class TV_QuickListAdapter extends
         }
 
         holder.itemText.setText(model.getName());
+        holder.itemCard.getBackground().setAlpha(50);
+
+        holder.itemText.setTextColor(context.getResources().getColor(R.color.text_color_UnSelected));
 
         holder.itemCard.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
                 if (hasFocus) {
-                    currentPosition = position;
                     scaleUp.start();
+                    holder.itemText.setTextColor(context.getResources().getColor(R.color.text_color));
                 } else {
                     scaleDown.start();
+                    holder.itemText.setTextColor(context.getResources().getColor(R.color.text_color_UnSelected));
+
                 }
             }
         });
 
-        holder.itemCard.getBackground().setAlpha(200);
-    }
-
-    public int getCurrentPosition() {
-        return currentPosition;
     }
 
     @Override
@@ -107,11 +113,11 @@ public class TV_QuickListAdapter extends
 
     public class ViewHolder extends RecyclerView.ViewHolder {
 
-        @BindView(R.id.search_view_card)
+        @BindView(R.id.quick_item_card)
         CardView itemCard;
-        @BindView(R.id.search_view_text)
+        @BindView(R.id.channel_view_text)
         TextView itemText;
-        @BindView(R.id.search_view_icon)
+        @BindView(R.id.channel_view_icon)
         ImageView itemFavIcon;
 
         public ViewHolder(View itemView) {

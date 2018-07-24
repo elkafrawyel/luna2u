@@ -6,6 +6,7 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.CompoundButton;
@@ -59,6 +60,17 @@ public class PlayerDialog extends Dialog{
             }
         });
 
+        VLC_Player.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus) {
+                    VLC_Player.setTextColor(mContext.getResources().getColor(R.color.colorWhite));
+
+                } else {
+                    VLC_Player.setTextColor(mContext.getResources().getColor(R.color.text_color));
+                }
+            }
+        });
 
         EXO_Player.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -68,6 +80,18 @@ public class PlayerDialog extends Dialog{
                         VLC_Player.setChecked(false);
                     }
                     NewApplication.getPreferencesHelper().setPlayer(EXO);
+                }
+            }
+        });
+
+        EXO_Player.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus) {
+                    EXO_Player.setTextColor(mContext.getResources().getColor(R.color.colorWhite));
+
+                } else {
+                    EXO_Player.setTextColor(mContext.getResources().getColor(R.color.text_color));
                 }
             }
         });

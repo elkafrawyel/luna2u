@@ -32,7 +32,7 @@ public class SettingsIconPresenter extends Presenter {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
                 if (hasFocus) {
-                    setImageBackground(view.findViewById(R.id.setting_container), R.color.text_color);
+                    setImageBackground(view.findViewById(R.id.setting_container),R.color.text_color);
                 } else {
                     setImageBackground(view.findViewById(R.id.setting_container), R.color.CardView_color);
                 }
@@ -46,7 +46,6 @@ public class SettingsIconPresenter extends Presenter {
     public void onBindViewHolder(Presenter.ViewHolder viewHolder, Object item) {
         ViewHolder vh = (ViewHolder) viewHolder;
         TV_SettingCard settingCard = (TV_SettingCard) item;
-
         vh.settingText.setText(settingCard.getSettingLabel());
         vh.settingIcon.setImageResource(settingCard.getIconResourceId());
     }

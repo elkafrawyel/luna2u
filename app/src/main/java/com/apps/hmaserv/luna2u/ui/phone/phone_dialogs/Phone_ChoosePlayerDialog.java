@@ -1,11 +1,15 @@
 package com.apps.hmaserv.luna2u.ui.phone.phone_dialogs;
 
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
 import android.app.Dialog;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.util.FloatProperty;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -53,6 +57,46 @@ public class Phone_ChoosePlayerDialog extends Dialog {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 Checked=isChecked;
+            }
+        });
+
+        btn_VLC.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus) {
+                    btn_VLC.setBackground(mContext.getResources().getDrawable(R.drawable.phone_un_choose_btn));
+                    btn_VLC.setTextColor(mContext.getResources().getColor(R.color.colorPrimary));
+                } else {
+                    btn_VLC.setBackground(mContext.getResources().getDrawable(R.drawable.phone_choose_btn));
+                    btn_VLC.setTextColor(mContext.getResources().getColor(R.color.text_color));
+
+                }
+            }
+        });
+
+        btn_EXO.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus) {
+                    btn_EXO.setBackground(mContext.getResources().getDrawable(R.drawable.phone_un_choose_btn));
+                    btn_EXO.setTextColor(mContext.getResources().getColor(R.color.colorPrimary));
+
+                } else {
+                    btn_EXO.setBackground(mContext.getResources().getDrawable(R.drawable.phone_choose_btn));
+                    btn_EXO.setTextColor(mContext.getResources().getColor(R.color.text_color));
+                }
+            }
+        });
+
+        checkBox.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus) {
+                    checkBox.setTextColor(mContext.getResources().getColor(R.color.colorWhite));
+
+                } else {
+                    checkBox.setTextColor(mContext.getResources().getColor(R.color.text_color));
+                }
             }
         });
     }

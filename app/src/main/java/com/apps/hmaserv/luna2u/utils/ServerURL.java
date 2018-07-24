@@ -10,6 +10,7 @@ public class ServerURL {
     public static final String LiveChannels_Url="https://luna2u.com/api/group/";
     public static final String Code_Url="https://luna2u.com/api/check/";
     public static final String Information_Url="https://luna2u.com/api/info/";
+    public static final String Refresh_Url="https://luna2u.com/api/update/";
 
     String Code="2299734573";
 

@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -7,17 +6,20 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <fragment
-        android:id="@+id/tv_browse_fragment"
-        class="com.apps.hmaserv.luna2u.ui.tv.tv_Fragments.TV_MainFragment"
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".ui.tv.tv_activities.TV_MainActivity"/>
+        android:id="@+id/TV_MainContainer">
 
-    <ProgressBar
-        android:id="@+id/progress_bar"
+    </FrameLayout>
+
+    <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"/>
-
+        android:id="@+id/tv_CurrentTime"
+        android:textColor="@color/text_color"
+        android:textSize="42sp"
+        android:text="10:00 PM"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="100dp"/>
 </FrameLayout>

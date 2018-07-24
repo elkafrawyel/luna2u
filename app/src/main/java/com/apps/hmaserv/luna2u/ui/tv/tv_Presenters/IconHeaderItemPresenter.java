@@ -18,8 +18,6 @@ import butterknife.ButterKnife;
 
 public class IconHeaderItemPresenter extends RowHeaderPresenter {
 
-    private float mUnselectedAlpha;
-
 
     public IconHeaderItemPresenter() {
 
@@ -27,9 +25,11 @@ public class IconHeaderItemPresenter extends RowHeaderPresenter {
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup viewGroup) {
-        mUnselectedAlpha = viewGroup.getResources().getFraction(R.fraction.lb_browse_header_unselect_alpha, 1, 1);
         LayoutInflater inflater = (LayoutInflater) viewGroup.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        final View view = inflater.inflate(R.layout.icon_header_item, null);
+        View view = null;
+        if (inflater != null) {
+            view = inflater.inflate(R.layout.icon_header_item, null);
+        }
         return new ViewHolder(view);
     }
 
@@ -52,17 +52,12 @@ public class IconHeaderItemPresenter extends RowHeaderPresenter {
 
         vh.headerName.setText(iconHeaderItem.getName());
 
+        //حل الريموت من الفيو نفسه ف ال xml ال properties بتاع الفيو ال Root
     }
 
     @Override
     public void onUnbindViewHolder(Presenter.ViewHolder viewHolder) {
         // no op
-    }
-
-    protected void onSelectLevelChanged(RowHeaderPresenter.ViewHolder holder) {
-        // this is a temporary fix
-        holder.view.setAlpha(mUnselectedAlpha + holder.getSelectLevel() *
-                (1.0f - mUnselectedAlpha));
     }
 
     public class ViewHolder extends RowHeaderPresenter.ViewHolder {

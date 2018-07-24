@@ -30,6 +30,7 @@ import com.apps.hmaserv.luna2u.NewApplication;
 import com.apps.hmaserv.luna2u.R;
 import com.apps.hmaserv.luna2u.data.LunaDatabase;
 import com.apps.hmaserv.luna2u.data.model.LiveChannelsModel;
+import com.apps.hmaserv.luna2u.data.model.LiveGroupsModel;
 import com.apps.hmaserv.luna2u.ui.phone.phone_dialogs.Phone_ChoosePlayerDialog;
 import com.apps.hmaserv.luna2u.ui.tv.tv_adapters.TV_QuickListAdapter;
 import com.apps.hmaserv.luna2u.ui.tv.tv_dialogs.QuickListDialog;
@@ -190,7 +191,7 @@ public class Player extends AppCompatActivity implements
             public void run() {
                 try {
                     Thread.sleep(5000);
-                } catch (InterruptedException e) {
+                } catch (InterruptedException ignored) {
 
                 }
 
@@ -253,22 +254,26 @@ public class Player extends AppCompatActivity implements
     }
 
     @Override
-    public void SelectedItem(LiveChannelsModel channel) {
+    public void SelectedItem(ArrayList<LiveChannelsModel>Channels
+            , LiveChannelsModel channel
+    , LiveGroupsModel liveGroupsModel) {
         if (player_View != null) {
             releasePlayer();
         }
+        this.Channels.clear();
+        this.Channels=Channels;
         mCurrentChannel = channel;
         mCurrentIndex = Channels.indexOf(channel);
 
+        Video_Group_Id=liveGroupsModel.getId();
+        Video_Group_Name=liveGroupsModel.getName();
+
         Video_Name = mCurrentChannel.getName();
-        Video_Group_Name = mCurrentChannel.getGroup();
 
         if (device_type.equals(TV) && Video_Name != null && Video_Group_Name != null)
             ShowChannelsInfo();
 
         Play(channel.getUrl(), EXO);
-
-
     }
 
     private int mCurrentIndex = -1;
@@ -284,7 +289,21 @@ public class Player extends AppCompatActivity implements
 
             case KeyEvent.KEYCODE_DPAD_RIGHT:
             case KeyEvent.KEYCODE_ALT_RIGHT:
+                //Show System Volume View
+                audioManager.adjustVolume(AudioManager.ADJUST_RAISE,
+                        AudioManager.FLAG_PLAY_SOUND);
+                audioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_SAME, AudioManager.FLAG_SHOW_UI);                return true;
+
+            case KeyEvent.KEYCODE_DPAD_LEFT:
+            case KeyEvent.KEYCODE_ALT_LEFT:
+                //Show System Volume View
+                audioManager.adjustVolume(AudioManager.ADJUST_LOWER,
+                        AudioManager.FLAG_PLAY_SOUND);
+                audioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_SAME, AudioManager.FLAG_SHOW_UI);                return true;
+
+            case KeyEvent.KEYCODE_DPAD_UP:
                 if (Channels != null && Channels.size() > 0) {
+
                     if (mCurrentIndex == -1 && mCurrentChannel == null) {
                         for (LiveChannelsModel model : Channels) {
                             if (model.getName().equals(Video_Name)) {
@@ -297,19 +316,30 @@ public class Player extends AppCompatActivity implements
                         releasePlayer();
                     }
                     mCurrentIndex++;
-                    mCurrentChannel = Channels.get(mCurrentIndex);
-                    Play(mCurrentChannel.getUrl(), EXO);
+                    if (mCurrentIndex<Channels.size()){
+                        mCurrentChannel = Channels.get(mCurrentIndex);
+                        Play(mCurrentChannel.getUrl(), EXO);
 
-                    Video_Name = mCurrentChannel.getName();
-                    Video_Group_Name = mCurrentChannel.getGroup();
+                        Video_Name = mCurrentChannel.getName();
+                        Video_Group_Name = mCurrentChannel.getGroup();
 
-                    if (device_type.equals(TV) && Video_Name != null && Video_Group_Name != null)
-                        ShowChannelsInfo();
+                        if (device_type.equals(TV) && Video_Name != null && Video_Group_Name != null)
+                            ShowChannelsInfo();
+                    }else {
+                        mCurrentIndex=0;
+                        mCurrentChannel = Channels.get(0);
+                        Play(mCurrentChannel.getUrl(), EXO);
+
+                        Video_Name = mCurrentChannel.getName();
+                        Video_Group_Name = mCurrentChannel.getGroup();
+
+                        if (device_type.equals(TV) && Video_Name != null && Video_Group_Name != null)
+                            ShowChannelsInfo();
+                    }
                 }
-
                 return true;
-            case KeyEvent.KEYCODE_DPAD_LEFT:
-            case KeyEvent.KEYCODE_ALT_LEFT:
+                 case KeyEvent.KEYCODE_DPAD_DOWN:
+
                 if (Channels != null && Channels.size() > 0) {
                     if (mCurrentIndex == -1 && mCurrentChannel == null) {
                         for (LiveChannelsModel model : Channels) {
@@ -323,32 +353,33 @@ public class Player extends AppCompatActivity implements
                         releasePlayer();
                     }
                     mCurrentIndex--;
-                    mCurrentChannel = Channels.get(mCurrentIndex);
-                    Play(mCurrentChannel.getUrl(), EXO);
+                    if (mCurrentIndex>=0){
+                        mCurrentChannel = Channels.get(mCurrentIndex);
+                        Play(mCurrentChannel.getUrl(), EXO);
 
-                    Video_Name = mCurrentChannel.getName();
-                    Video_Group_Name = mCurrentChannel.getGroup();
+                        Video_Name = mCurrentChannel.getName();
+                        Video_Group_Name = mCurrentChannel.getGroup();
 
-                    if (device_type.equals(TV) && Video_Name != null && Video_Group_Name != null)
-                        ShowChannelsInfo();
+                        if (device_type.equals(TV) && Video_Name != null && Video_Group_Name != null)
+                            ShowChannelsInfo();
+                    }else {
+                        mCurrentIndex=Channels.size()-1;
+                        mCurrentChannel = Channels.get(Channels.size()-1);
+                        Play(mCurrentChannel.getUrl(), EXO);
+
+                        Video_Name = mCurrentChannel.getName();
+                        Video_Group_Name = mCurrentChannel.getGroup();
+
+                        if (device_type.equals(TV) && Video_Name != null && Video_Group_Name != null)
+                            ShowChannelsInfo();
+                    }
                 }
                 return true;
-            case KeyEvent.KEYCODE_DPAD_UP:
-                //Show System Volume View
-                audioManager.adjustVolume(AudioManager.ADJUST_RAISE,
-                        AudioManager.FLAG_PLAY_SOUND);
-                audioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_SAME, AudioManager.FLAG_SHOW_UI);                return true;
-            case KeyEvent.KEYCODE_DPAD_DOWN:
-                //Show System Volume View
-                audioManager.adjustVolume(AudioManager.ADJUST_LOWER,
-                        AudioManager.FLAG_PLAY_SOUND);
-                audioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_SAME, AudioManager.FLAG_SHOW_UI);                return true;
-                default:
+               default:
                 Log.d("OnKey", String.valueOf(keyCode));
                 return super.onKeyDown(keyCode, event);
         }
     }
-
 
     ArrayList<LiveChannelsModel> Channels = new ArrayList<>();
 
@@ -406,13 +437,13 @@ public class Player extends AppCompatActivity implements
         if (Video_Group_Id != null && Video_Group_Id.equals("1")) {
             QuickListDialog dialog = new QuickListDialog(
                     Player.this, Video_Group_Id
-                    , Player.this, Channels);
+                    , Player.this);
             dialog.show();
         } else if (Video_Group_Id != null && !Video_Group_Id.equals("1") &&
                 Channels != null && Channels.size() > 0) {
             QuickListDialog dialog = new QuickListDialog(
                     Player.this, Video_Group_Id
-                    , Player.this, Channels);
+                    , Player.this);
             dialog.show();
         }
     }

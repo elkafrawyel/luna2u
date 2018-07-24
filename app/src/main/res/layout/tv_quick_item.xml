@@ -1,45 +1,57 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/search_view_card"
-    android:layout_width="450dp"
-    android:layout_height="wrap_content"
-    xmlns:test="http://schemas.android.com/tools"
-    app:cardBackgroundColor="#e6484747"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    app:cardElevation="8dp"
+    xmlns:test="http://schemas.android.com/tools"
+    android:id="@+id/quick_item_card"
+    android:layout_width="400dp"
+    android:layout_height="wrap_content"
     android:focusable="true"
-    android:focusableInTouchMode="true">
+    android:focusableInTouchMode="true"
+    app:cardBackgroundColor="@android:color/black">
 
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:id="@+id/ln">
 
         <ImageView
             android:layout_width="50dp"
             android:layout_height="50dp"
-            android:src="@drawable/logo"
-            android:layout_margin="8dp"/>
+            android:layout_margin="8dp"
+            android:src="@drawable/logo" />
+
         <TextView
-            android:id="@+id/search_view_text"
+            android:id="@+id/channel_view_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            test:text="Test Channel"
-            android:textColor="#ECBE11"
-            android:textSize="20sp"
-            android:padding="5dp"
             android:layout_gravity="center"
             android:layout_margin="5dp"
-            android:layout_marginStart="18dp"/>
+            android:layout_marginStart="18dp"
+            android:padding="5dp"
+            android:textColor="#ECBE11"
+            android:textSize="20sp"
+            test:text="Test Channel"
+            android:ellipsize="end"/>
 
         <ImageView
-            android:id="@+id/search_view_icon"
+            android:id="@+id/channel_view_icon"
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:layout_marginStart="16dp"
             android:layout_gravity="center"
-            android:visibility="visible"
             android:layout_marginEnd="8dp"
-            android:src="@drawable/ic_favorite_red_800_24dp" />
+            android:layout_marginStart="16dp"
+            android:src="@drawable/ic_favorite_red_800_24dp"
+            android:visibility="visible" />
     </LinearLayout>
 
+        <View
+            android:layout_width="400dp"
+            android:layout_height="0.0001dp"
+            android:layout_below="@+id/ln"
+            android:background="@android:color/white" />
+
+    </RelativeLayout>
 </android.support.v7.widget.CardView>

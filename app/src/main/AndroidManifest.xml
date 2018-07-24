@@ -38,6 +38,8 @@
         </activity>
         <activity android:name=".ui.tv.tv_activities.TV_LoginActivity" />
         <activity android:name=".ui.tv.tv_activities.TV_MainActivity" />
+        <activity android:name=".ui.tv.tv_activities.TV_LogOut_Activity"/>
+
         <activity
             android:name=".ui.phone.phone_activities.Phone_Splash"
             android:theme="@style/AppTheme" />

@@ -51,7 +51,7 @@ public class ChannelsCardPresenter extends Presenter {
             return mCardView;
         }
 
-        public Drawable getDefaultCardImage() {
+        Drawable getDefaultCardImage() {
             return mDefaultCardImage;
         }
 
@@ -78,7 +78,6 @@ public class ChannelsCardPresenter extends Presenter {
         ((ViewHolder) viewHolder).mCardView.setContentText(channel.getGroup());
         ((ViewHolder) viewHolder).mCardView.setMainImageDimensions(CARD_WIDTH, CARD_HEIGHT);
         ((ViewHolder) viewHolder).mCardView.setMainImage(((ViewHolder) viewHolder).getDefaultCardImage());
-
         if (channel.isIs_favorite()) {
             ((ViewHolder) viewHolder).mCardView.setBadgeImage(ContextCompat.getDrawable(mContext,
                     R.drawable.ic_favorite_red_800_24dp));
@@ -90,7 +89,6 @@ public class ChannelsCardPresenter extends Presenter {
                 .load(mContext.getResources().getDrawable(R.drawable.logo))
                 .apply(new RequestOptions().override(CARD_WIDTH, CARD_HEIGHT))
                 .into(((ViewHolder) viewHolder).mCardView.getMainImageView());
-
 
         // onLongClick items
         ((ViewHolder) viewHolder).mCardView.setOnLongClickListener(new View.OnLongClickListener() {

@@ -9,6 +9,7 @@ import android.support.v17.leanback.widget.Presenter;
 import android.support.v17.leanback.widget.Row;
 import android.support.v17.leanback.widget.RowPresenter;
 import android.support.v17.leanback.widget.VerticalGridPresenter;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.android.volley.RequestQueue;
@@ -22,6 +23,7 @@ import com.apps.hmaserv.luna2u.ui.tv.tv_Presenters.ChannelsCardPresenter;
 import com.apps.hmaserv.luna2u.utils.ServerURL;
 import com.apps.hmaserv.luna2u.utils.VolleySingleton;
 import com.google.gson.Gson;
+import com.valdesekamdem.library.mdtoast.MDToast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -31,6 +33,7 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 import static com.apps.hmaserv.luna2u.ui.tv.tv_Fragments.TV_MainFragment.mCurrentGroupId;
+import static com.apps.hmaserv.luna2u.utils.VolleySingleton.RequestKey;
 
 public class TV_ChannelsFragment extends TV_GridFragment {
 
@@ -41,7 +44,7 @@ public class TV_ChannelsFragment extends TV_GridFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        COLUMNS = 5;
+        COLUMNS = 4;
         categoryId = getArguments().getString("category_id");
         setupAdapter();
         if (categoryId!=null){
@@ -88,7 +91,7 @@ public class TV_ChannelsFragment extends TV_GridFragment {
     ArrayList<LiveChannelsModel> Channels = new ArrayList<>();
 
     private void loadData(String code) {
-
+        mAdapter.clear();
         Channels.clear();
         String Channels_Url=ServerURL.LiveChannels_Url.concat(code).concat("/")
                 .concat(String.valueOf(categoryId));
@@ -147,6 +150,7 @@ public class TV_ChannelsFragment extends TV_GridFragment {
         if (mFavList.size() > 0) {
             mAdapter.addAll(0, mFavList);
         } else
-            Toast.makeText(getActivity(), "No Favorite Channels", Toast.LENGTH_SHORT).show();
+            MDToast.makeText(Objects.requireNonNull(getActivity()),
+                    "No Favorite Channels", Toast.LENGTH_LONG,MDToast.TYPE_INFO).show();
     }
 }
