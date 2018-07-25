@@ -34,6 +34,8 @@
             android:textColor="#ECBE11"
             android:textSize="20sp"
             test:text="Test Channel"
+            android:gravity="start"
+            android:layoutDirection="ltr"
             android:ellipsize="end"/>
 
         <ImageView

@@ -167,7 +167,8 @@ public class QuickListDialog extends Dialog implements TV_QuickListAdapter.IItem
         if (Group_Id.equals("1")) {
             Channels.clear();
             Channels.addAll(LunaDatabase.getInstance(mContext).getUserDao().getAllChannels());
-            adapter = new TV_QuickListAdapter(Channels, QuickListDialog.this);
+            adapter = new TV_QuickListAdapter(Channels,
+                    QuickListDialog.this);
             rv.setAdapter(adapter);
             rv.setHasFixedSize(true);
             rv.setLayoutManager(new LinearLayoutManager(mContext));
@@ -182,36 +183,40 @@ public class QuickListDialog extends Dialog implements TV_QuickListAdapter.IItem
         switch (keyCode) {
             case KeyEvent.KEYCODE_DPAD_RIGHT:
             case KeyEvent.KEYCODE_ALT_RIGHT:
-                if (Groups.size() > 0 && groupIndex < Groups.size()-1) {
+            if (!Group_Id.equals("1")) {
+                if (Groups.size() > 0 && groupIndex < Groups.size() - 1) {
                     groupIndex++;
                     String groupName = Groups.get(groupIndex).getName();
-                    String groupId= Groups.get(groupIndex).getId();
+                    String groupId = Groups.get(groupIndex).getId();
                     loadChannels(mCode, groupId);
                     mGroupName.setText(groupName);
                 } else {
                     groupIndex = 0;
                     String groupName = Groups.get(groupIndex).getName();
-                    String groupId= Groups.get(groupIndex).getId();
+                    String groupId = Groups.get(groupIndex).getId();
 
                     loadChannels(mCode, groupId);
                     mGroupName.setText(groupName);
                 }
+            }
                 return true;
             case KeyEvent.KEYCODE_DPAD_LEFT:
             case KeyEvent.KEYCODE_ALT_LEFT:
-                if (groupIndex > 0) {
-                    groupIndex--;
-                    String groupName = Groups.get(groupIndex).getName();
-                    String groupId= Groups.get(groupIndex).getId();
-                    loadChannels(mCode, groupId);
-                    mGroupName.setText(groupName);
-                } else {
-                    groupIndex = Groups.size()-1;
-                    String groupName = Groups.get(groupIndex).getName();
-                    String groupId= Groups.get(groupIndex).getId();
-                    loadChannels(mCode, groupId);
-                    mGroupName.setText(groupName);
+                if (!Group_Id.equals("1")) {
+                    if (groupIndex > 0) {
+                        groupIndex--;
+                        String groupName = Groups.get(groupIndex).getName();
+                        String groupId = Groups.get(groupIndex).getId();
+                        loadChannels(mCode, groupId);
+                        mGroupName.setText(groupName);
+                    } else {
+                        groupIndex = Groups.size() - 1;
+                        String groupName = Groups.get(groupIndex).getName();
+                        String groupId = Groups.get(groupIndex).getId();
+                        loadChannels(mCode, groupId);
+                        mGroupName.setText(groupName);
 
+                    }
                 }
                 return true;
             default:
@@ -259,13 +264,19 @@ public class QuickListDialog extends Dialog implements TV_QuickListAdapter.IItem
     public void ItemClicked(int position) {
         LiveChannelsModel model = Channels.get(position);
         QuickListDialog.this.dismiss();
-        for (LiveGroupsModel liveGroupsModel :Groups) {
-            if (liveGroupsModel.getName().equals(model.getGroup())){
-                groupIndex=Groups.indexOf(liveGroupsModel);
-                mGroupName.setText(liveGroupsModel.getName());
-                iSelectedItem.SelectedItem(Channels,model,liveGroupsModel);
+
+        if (Group_Id.equals("1")) {
+            iSelectedItem.SelectedItem(Channels,model,null);
+        }else {
+            for (LiveGroupsModel liveGroupsModel :Groups) {
+                if (liveGroupsModel.getName().equals(model.getGroup())){
+                    groupIndex=Groups.indexOf(liveGroupsModel);
+                    mGroupName.setText(liveGroupsModel.getName());
+                    iSelectedItem.SelectedItem(Channels,model,liveGroupsModel);
+                }
             }
         }
+
     }
 
     public interface ISelectedItem {

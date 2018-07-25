@@ -21,8 +21,10 @@ import android.support.v17.leanback.widget.RowHeaderPresenter;
 import android.support.v17.leanback.widget.SectionRow;
 import android.support.v4.app.Fragment;
 import android.text.format.DateFormat;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -31,6 +33,8 @@ import com.android.volley.RetryPolicy;
 import com.android.volley.VolleyError;
 import com.apps.hmaserv.luna2u.NewApplication;
 import com.apps.hmaserv.luna2u.R;
+import com.apps.hmaserv.luna2u.data.LunaDatabase;
+import com.apps.hmaserv.luna2u.data.model.LiveChannelsModel;
 import com.apps.hmaserv.luna2u.data.model.LiveGroupsModel;
 import com.apps.hmaserv.luna2u.ui.tv.tv_Models.TV_IconHeaderItem;
 import com.apps.hmaserv.luna2u.ui.tv.tv_Presenters.IconHeaderItemPresenter;
@@ -41,6 +45,7 @@ import com.apps.hmaserv.luna2u.utils.ServerURL;
 import com.apps.hmaserv.luna2u.utils.VolleySingleton;
 import com.apps.hmaserv.luna2u.utils.VolleySingleton.JsonVolleyCallbackError;
 import com.google.gson.Gson;
+import com.valdesekamdem.library.mdtoast.MDToast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -48,30 +53,26 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Objects;
-
-import static com.apps.hmaserv.luna2u.utils.VolleySingleton.RequestKey;
 
 public class TV_MainFragment extends BrowseSupportFragment {
     ArrayList<LiveGroupsModel> Groups = new ArrayList<>();
+    ArrayList<LiveChannelsModel> Channels = new ArrayList<>();
     private boolean firstTime = true;
     public static String mCurrentGroupId;
     private final RequestQueue mRequestQueue = VolleySingleton.getInstance().getRequestQueue();
     BackgroundManager mBackgroundManager;
     TextView mCurrentTime;
+    ArrayObjectAdapter mRowsAdapter;
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        mCurrentTime= Objects.requireNonNull(getActivity()).findViewById(R.id.tv_CurrentTime);
+        mCurrentTime = Objects.requireNonNull(getActivity()).findViewById(R.id.tv_CurrentTime);
         LoadDataFromServer();
-        setUpUiElements();
         setUpEventListeners();
     }
-
 
     private void setUpUiElements() {
         setBadgeDrawable(Objects.requireNonNull(getActivity())
@@ -84,7 +85,9 @@ public class TV_MainFragment extends BrowseSupportFragment {
         mBackgroundManager = BackgroundManager.getInstance(getActivity());
         mBackgroundManager.attach(getActivity().getWindow());
         getMainFragmentRegistry().registerFragment(PageRow.class,
-                new LiveFragmentFactory(mBackgroundManager,getContext(),getHeadersSupportFragment(),mCurrentTime));
+                new LiveFragmentFactory(mBackgroundManager, getContext(),
+                        getHeadersSupportFragment()
+                        , mCurrentTime, Channels));
         setHeaderPresenterSelector(new PresenterSelector() {
             @Override
             public Presenter getPresenter(Object item) {
@@ -97,11 +100,10 @@ public class TV_MainFragment extends BrowseSupportFragment {
             }
         });
         prepareEntranceTransition();
-
     }
 
-    public void myOnKeyDown(int key_code){
-        if (key_code==KeyEvent.KEYCODE_BACK) {
+    public void myOnKeyDown(int key_code) {
+        if (key_code == KeyEvent.KEYCODE_BACK) {
             setSelectedPosition(0);
             mCurrentGroupId = "0";
             setHeadersState(HEADERS_HIDDEN);
@@ -112,7 +114,8 @@ public class TV_MainFragment extends BrowseSupportFragment {
         setOnSearchClickedListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                SearchDialog dialog = new SearchDialog(Objects.requireNonNull(getActivity()));
+                SearchDialog dialog = new SearchDialog
+                        (Objects.requireNonNull(getActivity()), Channels);
                 dialog.show();
             }
         });
@@ -175,6 +178,7 @@ public class TV_MainFragment extends BrowseSupportFragment {
 
     private void LoadGroups(final String code) {
         Groups = new ArrayList<>();
+        mRequestQueue.cancelAll(VolleySingleton.RequestKey);
         mRequestQueue.add(
                 VolleySingleton.getInstance().makeStringResponse(
                         ServerURL.LiveGroups_Url.concat(code),
@@ -186,34 +190,90 @@ public class TV_MainFragment extends BrowseSupportFragment {
                                 for (int i = 0; i < array.length(); i++) {
                                     LiveGroupsModel model = new Gson().fromJson(array.get(i)
                                             .toString(), LiveGroupsModel.class);
-
-
                                     Groups.add(model);
                                 }
                                 if (Groups.size() > 0) {
-                                    loadData();
+                                    mThread thread=new mThread(code, new IChannelsLoaded() {
+                                        @Override
+                                        public void Loaded(ArrayList<LiveChannelsModel> Channels) {
+                                            SetDataToAdapter();
+                                        }
+                                    });
+                                    thread.start();
                                 }
                             }
                         }, new JsonVolleyCallbackError() {
                             @Override
                             public void onError(VolleyError error) {
+                                MDToast.makeText(Objects.requireNonNull(getContext()),
+                                        "Can't Load Groups From Server",MDToast.TYPE_ERROR).show();
                                 Handler.volleyErrorHandler(error, getActivity());
                             }
                         }
                 )
+        ).setTag(VolleySingleton.RequestKey);
+    }
+
+    public class mThread extends Thread{
+        IChannelsLoaded iChannelsLoaded;
+        String Code;
+        mThread(String Code, IChannelsLoaded iChannelsLoaded) {
+            super(Code);
+            this.Code=Code;
+            this.iChannelsLoaded = iChannelsLoaded;
+        }
+
+        @Override
+            public void run() {
+                super.run();
+                LoadChannels(Code,iChannelsLoaded);
+                Log.e("Url",Thread.currentThread().getId()+"");
+            }
+        };
+
+    private void LoadChannels(String code, final IChannelsLoaded iChannelsLoaded) {
+        RequestQueue mRequestQueue = VolleySingleton.getInstance().getRequestQueue();
+        mRequestQueue.add(
+                VolleySingleton.getInstance().makeStringResponse(ServerURL.AllChannels
+                                .concat(code),
+                        new VolleySingleton.VolleyCallback() {
+                            @Override
+                            public void onSuccess(String result) throws JSONException {
+                                JSONObject Groups = new JSONObject(result);
+                                JSONArray array = Groups.getJSONArray("channels");
+                                for (int i = 0; i < array.length(); i++) {
+                                    JSONObject object = new JSONObject(array.get(i).toString());
+                                    String id = object.getString("id");
+                                    String name = object.getString("name");
+                                    String url = object.getString("url");
+                                    String group = object.getString("group");
+
+                                    LiveChannelsModel liveChannelsModels = new LiveChannelsModel(id, name, group, url, false);
+                                    Channels.add(liveChannelsModels);
+
+                                }
+                                iChannelsLoaded.Loaded(Channels);
+                            }
+                        }
+                        , new VolleySingleton.JsonVolleyCallbackError() {
+                            @Override
+                            public void onError(VolleyError error) {
+                                MDToast.makeText(Objects.requireNonNull(getContext()),
+                                        "Can't Load Channels From Server",MDToast.TYPE_ERROR).show();
+                                Handler.volleyErrorHandler(error, getContext());
+                            }
+                        })
         );
     }
 
-    ArrayObjectAdapter mRowsAdapter;
-
-    private void loadData() {
-        mRowsAdapter = new ArrayObjectAdapter(new ListRowPresenter());
-        setAdapter(mRowsAdapter);
-        newCreateRows(Groups);
+    public interface IChannelsLoaded{
+        void Loaded(ArrayList<LiveChannelsModel> Channels);
     }
 
-    private void newCreateRows(List<LiveGroupsModel> groups) {
-        mRowsAdapter.clear();
+
+    private void SetDataToAdapter() {
+        mRowsAdapter = new ArrayObjectAdapter(new ListRowPresenter());
+        setAdapter(mRowsAdapter);
 
         TV_IconHeaderItem settingsHeaderItem = new TV_IconHeaderItem
                 (0, "0",
@@ -229,8 +289,8 @@ public class TV_MainFragment extends BrowseSupportFragment {
         mRowsAdapter.add(new DividerRow());
         mRowsAdapter.add(new SectionRow(new HeaderItem("Categories")));
 
-        for (int i = 0; i < groups.size(); i++) {
-            LiveGroupsModel category = groups.get(i);
+        for (int i = 0; i < Groups.size(); i++) {
+            LiveGroupsModel category = Groups.get(i);
             TV_IconHeaderItem headerItem = new TV_IconHeaderItem
                     (i + 4, category.getId(), category.getName(), 2);
             PageRow pageRow1 = new PageRow(headerItem);
@@ -249,14 +309,13 @@ public class TV_MainFragment extends BrowseSupportFragment {
             //handling header items clicks
 
 
-
             getHeadersSupportFragment().setOnHeaderClickedListener(
                     new HeadersSupportFragment.OnHeaderClickedListener() {
                         @Override
                         public void onHeaderClicked(RowHeaderPresenter.ViewHolder viewHolder, Row row) {
                             if (firstTime) {
-                                firstTime=false;
-                            }else {
+                                firstTime = false;
+                            } else {
                                 setSelectedPosition(getHeadersSupportFragment().getSelectedPosition());
                                 mCurrentGroupId = ((TV_IconHeaderItem) row.getHeaderItem()).getCategoryId();
                             }
@@ -267,24 +326,29 @@ public class TV_MainFragment extends BrowseSupportFragment {
                 @Override
                 public void onHeaderSelected(RowHeaderPresenter.ViewHolder viewHolder, Row row) {
                     if (firstTime) {
-                        firstTime=false;
+                        firstTime = false;
                         startEntranceTransition();
                         setSelectedPosition(4);
-                    }else {
-                        int pos=getHeadersSupportFragment().getSelectedPosition();
+                    } else {
+                        int pos = getHeadersSupportFragment().getSelectedPosition();
                         setSelectedPosition(pos);
                         mCurrentGroupId = ((TV_IconHeaderItem) row.getHeaderItem()).getCategoryId();
                     }
                 }
             });
         }
+
+
+        setUpUiElements();
+
     }
 
     @Override
     public void onResume() {
         super.onResume();
         //when back from logout window
-        mBackgroundManager.setBitmap(BitmapFactory.decodeResource(Objects.requireNonNull(getContext()).getResources(), R.drawable.channels_tv_background));
+        if (mBackgroundManager != null)
+            mBackgroundManager.setBitmap(BitmapFactory.decodeResource(Objects.requireNonNull(getContext()).getResources(), R.drawable.channels_tv_background));
     }
 
     private static class LiveFragmentFactory extends FragmentFactory {
@@ -292,12 +356,16 @@ public class TV_MainFragment extends BrowseSupportFragment {
         private Context mContext;
         HeadersSupportFragment headersSupportFragment;
         TextView mCurrentTime;
+        ArrayList<LiveChannelsModel> Channels = new ArrayList<>();
+
         LiveFragmentFactory(BackgroundManager backgroundManager, Context mContext,
-                            HeadersSupportFragment headersSupportFragment,TextView mCurrentTime) {
+                            HeadersSupportFragment headersSupportFragment,
+                            TextView mCurrentTime, ArrayList<LiveChannelsModel> Channels) {
             this.mBackgroundManager = backgroundManager;
-            this.mContext=mContext;
-            this.headersSupportFragment=headersSupportFragment;
-            this.mCurrentTime=mCurrentTime;
+            this.mContext = mContext;
+            this.headersSupportFragment = headersSupportFragment;
+            this.mCurrentTime = mCurrentTime;
+            this.Channels = Channels;
         }
 
         @Override
@@ -307,11 +375,18 @@ public class TV_MainFragment extends BrowseSupportFragment {
             mBackgroundManager.setBitmap(BitmapFactory.decodeResource(mContext.getResources(), R.drawable.channels_tv_background));
 
             if (iconHeaderItem.getId() == 0) {
-                TV_SettingsFragment settingsFragment=new TV_SettingsFragment();
-                settingsFragment.iFavoriteClicked=new TV_SettingsFragment.IFavoriteClicked() {
+                TV_SettingsFragment settingsFragment = new TV_SettingsFragment();
+                settingsFragment.iFavoriteClicked = new TV_SettingsFragment.IFavoriteClicked() {
                     @Override
                     public void Handle() {
                         headersSupportFragment.setSelectedPosition(1);
+                    }
+                };
+                settingsFragment.iSearchClicked = new TV_SettingsFragment.ISearchClicked() {
+                    @Override
+                    public void Handle() {
+                        SearchDialog dialog = new SearchDialog(mContext, Channels);
+                        dialog.show();
                     }
                 };
                 ShowTime();
@@ -319,20 +394,21 @@ public class TV_MainFragment extends BrowseSupportFragment {
             } else {
                 Bundle bundle = new Bundle();
                 bundle.putString("category_id", iconHeaderItem.getCategoryId());
-                bundle.putLong("header_id", iconHeaderItem.getCategoryIndex());
+                bundle.putString("category_name", iconHeaderItem.getName());
                 TV_ChannelsFragment channelsFragment = new TV_ChannelsFragment();
                 channelsFragment.setArguments(bundle);
                 HideTime();
+                channelsFragment.Channels=Channels;
                 return channelsFragment;
             }
         }
 
-        void ShowTime(){
+        void ShowTime() {
             mCurrentTime.setText(getDateFromTimeStamp(DateFormat_4));
             mCurrentTime.setVisibility(View.VISIBLE);
         }
 
-        private void HideTime(){
+        private void HideTime() {
             mCurrentTime.setVisibility(View.GONE);
         }
 
@@ -343,7 +419,7 @@ public class TV_MainFragment extends BrowseSupportFragment {
         //Wed, 4 Jul 2001 12:08:56
         public static final String DateFormat_3 = "EEE, d MMM yyyy HH:mm:ss";
         //Wed, 4 Jul 2001 12:08
-        public static final String DateFormat_4 = "EEE, d MMM yyyy HH:mm a";
+        public static final String DateFormat_4 = "EEE, d MMM yyyy HH:mm";
 
 
         private String getDateFromTimeStamp(String format) {

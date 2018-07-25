@@ -53,6 +53,20 @@ public class IconHeaderItemPresenter extends RowHeaderPresenter {
         vh.headerName.setText(iconHeaderItem.getName());
 
         //حل الريموت من الفيو نفسه ف ال xml ال properties بتاع الفيو ال Root
+
+        vh.headerName.setTextColor(vh.headerName.getResources().getColor(R.color.text_color_UnSelected));
+        vh.view.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus){
+                    vh.headerName.setTextColor(vh.headerName.getResources().getColor(R.color.text_color));
+
+                }else {
+                    vh.headerName.setTextColor(vh.headerName.getResources().getColor(R.color.text_color_UnSelected));
+
+                }
+            }
+        });
     }
 
     @Override

@@ -10,6 +10,7 @@ import android.support.v17.leanback.widget.Row;
 import android.support.v17.leanback.widget.RowPresenter;
 import android.support.v17.leanback.widget.VerticalGridPresenter;
 import android.util.Log;
+import android.util.SparseArray;
 import android.widget.Toast;
 
 import com.android.volley.RequestQueue;
@@ -30,6 +31,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Objects;
 
 import static com.apps.hmaserv.luna2u.ui.tv.tv_Fragments.TV_MainFragment.mCurrentGroupId;
@@ -37,37 +39,58 @@ import static com.apps.hmaserv.luna2u.utils.VolleySingleton.RequestKey;
 
 public class TV_ChannelsFragment extends TV_GridFragment {
 
-    private String categoryId;
+    private String categoryId,categoryName;
     private static int COLUMNS;
-    private final int ZOOM_FACTOR = FocusHighlight.ZOOM_FACTOR_SMALL;
     private ArrayObjectAdapter mAdapter;
+    public ArrayList<LiveChannelsModel> Channels = new ArrayList<>();
+    public ArrayList<LiveChannelsModel> SmallChannels = new ArrayList<>();
+    ArrayList<LiveChannelsModel> mFavList = new ArrayList<>();
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         COLUMNS = 4;
-        categoryId = getArguments().getString("category_id");
-        setupAdapter();
-        if (categoryId!=null){
-            if (Objects.equals(categoryId,"1")) {
-                loadFavoriteData();
-            } else {
-                String url = NewApplication.getPreferencesHelper().getActivationCode();
-                loadData(url);
-            }
-        }
-
-        getMainFragmentAdapter().getFragmentHost()
-                .notifyDataReady(getMainFragmentAdapter());
-    }
-
-    private void setupAdapter() {
+        int ZOOM_FACTOR = FocusHighlight.ZOOM_FACTOR_SMALL;
         VerticalGridPresenter presenter = new VerticalGridPresenter(ZOOM_FACTOR);
         presenter.setNumberOfColumns(COLUMNS);
         setGridPresenter(presenter);
 
+        if (getArguments() != null) {
+            categoryName=getArguments().getString("category_name");
+            categoryId = getArguments().getString("category_id");
+        }
+
         ChannelsCardPresenter mCardViewPresenter = new ChannelsCardPresenter();
         mAdapter = new ArrayObjectAdapter(mCardViewPresenter);
         setAdapter(mAdapter);
+
+        if (categoryId != null) {
+            if (Objects.equals(categoryId, "1")) {
+                mAdapter.clear();
+                mFavList = (ArrayList<LiveChannelsModel>) LunaDatabase.getInstance(getActivity()).getUserDao().getAllChannels();
+                if (mFavList.size() > 0) {
+                    mAdapter.addAll(0, mFavList);
+                } else
+                    MDToast.makeText(Objects.requireNonNull(getActivity()),
+                            "No Favorite Channels", Toast.LENGTH_LONG, MDToast.TYPE_INFO).show();
+            } else {
+                for (int i = 0; i < Channels.size(); i++) {
+                    if (Channels.get(i).getGroup().equals(categoryId)) {
+                        LiveChannelsModel model=Channels.get(i);
+                        model.setGroup(categoryName);
+                        model.setName(model.getName());
+
+                        SmallChannels.add(model);
+                    }
+                }
+                mAdapter.addAll(0, SmallChannels);
+            }
+        }
+
+
+        getMainFragmentAdapter().getFragmentHost()
+                .notifyDataReady(getMainFragmentAdapter());
+
 
         setOnItemViewClickedListener(new OnItemViewClickedListener() {
             @Override
@@ -77,80 +100,18 @@ public class TV_ChannelsFragment extends TV_GridFragment {
                     RowPresenter.ViewHolder rowViewHolder,
                     Row row) {
 
+                LiveChannelsModel model=((LiveChannelsModel) item);
                 Intent i = new Intent(getActivity(), Player.class);
-                i.putExtra("url", ((LiveChannelsModel) item).getUrl());
-                i.putExtra("group_id",mCurrentGroupId);
-                i.putExtra("group_name",((LiveChannelsModel) item).getGroup());
-                i.putExtra("name",((LiveChannelsModel) item).getName());
+                i.putExtra("id", model.getId());
+                i.putExtra("url", model.getUrl());
+                i.putExtra("group_id", mCurrentGroupId);
+                i.putExtra("group_name", model.getGroup());
+                i.putExtra("name", model.getName());
+                i.putExtra("fav", model.isIs_favorite());
+
                 Objects.requireNonNull(getActivity()).startActivity(i);
             }
         });
-
     }
 
-    ArrayList<LiveChannelsModel> Channels = new ArrayList<>();
-
-    private void loadData(String code) {
-        mAdapter.clear();
-        Channels.clear();
-        String Channels_Url=ServerURL.LiveChannels_Url.concat(code).concat("/")
-                .concat(String.valueOf(categoryId));
-        RequestQueue mRequestQueue = VolleySingleton.getInstance().getRequestQueue();
-        mRequestQueue.add(
-                VolleySingleton.getInstance().makeStringResponse(Channels_Url,
-                        new VolleySingleton.VolleyCallback() {
-                            @Override
-                            public void onSuccess(String result) throws JSONException {
-                                JSONObject Groups = new JSONObject(result);
-                                JSONArray array = Groups.getJSONArray("channels");
-
-                                for (int i = 0; i < array.length(); i++) {
-
-                                    LiveChannelsModel model = new Gson().fromJson(array.get(i)
-                                            .toString(), LiveChannelsModel.class);
-                                    LiveChannelsModel temp = LunaDatabase.getInstance(getActivity())
-                                            .getUserDao().getChannelById(model.getId());
-                                    if (temp != null)
-                                        model.setIs_favorite(true);
-
-                                    Channels.add(model);
-                                }
-
-                                mAdapter.addAll(0, Channels);
-                            }
-                        }, new VolleySingleton.JsonVolleyCallbackError() {
-                            @Override
-                            public void onError(VolleyError error) {
-
-                            }
-                        })
-        ).setRetryPolicy(new RetryPolicy() {
-            @Override
-            public int getCurrentTimeout() {
-                return 2000;
-            }
-
-            @Override
-            public int getCurrentRetryCount() {
-                return 0;
-            }
-
-            @Override
-            public void retry(VolleyError error) throws VolleyError {
-
-            }
-        });
-
-    }
-
-    ArrayList<LiveChannelsModel> mFavList = new ArrayList<>();
-    private void loadFavoriteData() {
-        mAdapter.clear();
-        mFavList.addAll(LunaDatabase.getInstance(getActivity()).getUserDao().getAllChannels());
-        if (mFavList.size() > 0) {
-            mAdapter.addAll(0, mFavList);
-        } else
-            MDToast.makeText(Objects.requireNonNull(getActivity()),
-                    "No Favorite Channels", Toast.LENGTH_LONG,MDToast.TYPE_INFO).show();
-    }
 }

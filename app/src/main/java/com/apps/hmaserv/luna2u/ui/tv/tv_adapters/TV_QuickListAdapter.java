@@ -84,8 +84,7 @@ public class TV_QuickListAdapter extends
         } else {
             holder.itemFavIcon.setVisibility(View.GONE);
         }
-
-        holder.itemText.setText(model.getName());
+        holder.itemText.setText(model.getId().concat(" - ").concat(model.getName()));
         holder.itemCard.getBackground().setAlpha(50);
 
         holder.itemText.setTextColor(context.getResources().getColor(R.color.text_color_UnSelected));
@@ -99,7 +98,6 @@ public class TV_QuickListAdapter extends
                 } else {
                     scaleDown.start();
                     holder.itemText.setTextColor(context.getResources().getColor(R.color.text_color_UnSelected));
-
                 }
             }
         });

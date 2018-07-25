@@ -1,8 +1,10 @@
 package com.apps.hmaserv.luna2u.ui.tv.tv_Fragments;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v17.leanback.app.RowsSupportFragment;
@@ -41,6 +43,7 @@ import static com.apps.hmaserv.luna2u.utils.VolleySingleton.RequestKey;
 public class TV_SettingsFragment extends RowsSupportFragment {
 
     public IFavoriteClicked iFavoriteClicked;
+    public ISearchClicked iSearchClicked;
     public TV_SettingsFragment() {
     }
 
@@ -84,9 +87,7 @@ public class TV_SettingsFragment extends RowsSupportFragment {
                         break;
 
                     case 4:
-                        SearchDialog mDialog = new SearchDialog
-                                (Objects.requireNonNull(getActivity()));
-                        mDialog.show();
+                        iSearchClicked.Handle();
                         break;
 
                     case 5:
@@ -95,15 +96,24 @@ public class TV_SettingsFragment extends RowsSupportFragment {
 
                     case 6:
                         //Refresh
+
+
+
+
+
+
+
+
                         String code=NewApplication.getPreferencesHelper().getActivationCode();
                         Refresh(code);
+
+
                         break;
                 }
             }
         });
     }
     private final RequestQueue mRequestQueue = VolleySingleton.getInstance().getRequestQueue();
-
     private void Refresh(String code){
         mRequestQueue.add(
                 VolleySingleton.getInstance().makeStringResponse(
@@ -113,13 +123,29 @@ public class TV_SettingsFragment extends RowsSupportFragment {
                             public void onSuccess(String result) throws JSONException {
                                 JSONObject Groups = new JSONObject(result);
                                 String code = Groups.getString("code");
-                                String status = Groups.getString("status");
-
                                 if(code.equals("0")){
-                                    MDToast.makeText(NewApplication.getAppContext(),
-                                            "success!", Toast.LENGTH_LONG,
-                                            MDToast.TYPE_SUCCESS).show();
-                                    mRequestQueue.getCache().clear();
+                                    mRequestQueue.getCache().remove(VolleySingleton.RequestKey);
+                                    final ProgressDialog progress = new ProgressDialog(getContext());
+                                    progress.setTitle("Refreshing");
+                                    progress.setMessage("Updating Channels and Groups,\nplease wait a while.");
+                                    progress.setCancelable(false);
+                                    progress.show();
+
+                                    Runnable progressRunnable = new Runnable() {
+
+                                        @Override
+                                        public void run() {
+                                            progress.cancel();
+                                            MDToast.makeText(NewApplication.getAppContext(),
+                                                    "success!", Toast.LENGTH_LONG,
+                                                    MDToast.TYPE_SUCCESS).show();
+
+                                        }
+                                    };
+
+                                    Handler pdCanceller = new Handler();
+                                    pdCanceller.postDelayed(progressRunnable, 60*5000);
+
                                 }else if (code.equals("2")){
                                     MDToast.makeText(NewApplication.getAppContext(),
                                             "Subscription not found!", Toast.LENGTH_LONG,
@@ -136,7 +162,7 @@ public class TV_SettingsFragment extends RowsSupportFragment {
         ).setRetryPolicy(new RetryPolicy() {
             @Override
             public int getCurrentTimeout() {
-                return 2000;
+                return 5000;
             }
 
             @Override
@@ -186,4 +212,8 @@ public class TV_SettingsFragment extends RowsSupportFragment {
         void Handle();
     }
 
+
+    public interface ISearchClicked{
+        void Handle();
+    }
 }

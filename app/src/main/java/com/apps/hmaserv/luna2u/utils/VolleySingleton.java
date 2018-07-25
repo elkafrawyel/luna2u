@@ -68,7 +68,7 @@ public class VolleySingleton {
                 errorCallback.onError(error);
                 Log.d("error", error.toString());
             }
-        }) {@Override
+        }){@Override
             protected Map<String, String> getParams() throws AuthFailureError {
                 return map;
             }

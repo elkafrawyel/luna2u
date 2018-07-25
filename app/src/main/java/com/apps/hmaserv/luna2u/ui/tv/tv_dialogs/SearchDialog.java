@@ -42,9 +42,11 @@ public class SearchDialog extends Dialog{
     @BindView(R.id.search_result_rv)
     RecyclerView search_rv;
     private ArrayList<LiveChannelsModel>Channels=new ArrayList<>();
-    public SearchDialog(@NonNull Context context) {
+    public SearchDialog(@NonNull Context context,ArrayList<LiveChannelsModel> Channels) {
         super(context);
         mContext = context;
+        this.Channels=Channels;
+
     }
 
     @Override
@@ -58,9 +60,11 @@ public class SearchDialog extends Dialog{
         getWindow().setLayout(WindowManager.LayoutParams.MATCH_PARENT,
                 WindowManager.LayoutParams.MATCH_PARENT);
         this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
-        String Code= NewApplication.getPreferencesHelper().getActivationCode();
-        LoadChannels(Code);
-        ApplySearch();
+        if (Channels.size()>0){
+            adapter=new TV_SearchAdapter(Channels);
+            search_rv.setAdapter(adapter);
+            ApplySearch();
+        }
     }
     private void ApplySearch(){
         search_rv.setHasFixedSize(true);
@@ -84,39 +88,4 @@ public class SearchDialog extends Dialog{
             }
         });
     }
-
-
-    private void LoadChannels(String code_from_user) {
-        RequestQueue mRequestQueue = VolleySingleton.getInstance().getRequestQueue();
-        mRequestQueue.add(
-                VolleySingleton.getInstance().makeStringResponse(ServerURL.AllChannels
-                                .concat(code_from_user),
-                        new VolleySingleton.VolleyCallback() {
-                            @Override
-                            public void onSuccess(String result) throws JSONException {
-                                //Channels
-                                //get Channels List By group id here
-                                JSONObject Groups = new JSONObject(result);
-                                JSONArray array = Groups.getJSONArray("channels");
-                                for (int i = 0; i < array.length(); i++) {
-                                    JSONObject object = new JSONObject(array.get(i).toString());
-                                    String id = object.getString("id");
-                                    String name = object.getString("name");
-                                    String url = object.getString("url");
-                                    String group = object.getString("group");
-                                    Channels.add(new LiveChannelsModel(id, name, group, url, false));
-                                }
-                                adapter=new TV_SearchAdapter(Channels);
-                                search_rv.setAdapter(adapter);
-                            }
-                        }
-                        , new VolleySingleton.JsonVolleyCallbackError() {
-                            @Override
-                            public void onError(VolleyError error) {
-                                Handler.volleyErrorHandler(error, mContext);
-                            }
-                        })
-        );
-    }
-
 }

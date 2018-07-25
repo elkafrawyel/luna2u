@@ -1,16 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/TV_MainContainer">
-
+        android:id="@+id/TV_MainContainer"
+        >
     </FrameLayout>
 
     <TextView
@@ -19,7 +20,7 @@
         android:id="@+id/tv_CurrentTime"
         android:textColor="@color/text_color"
         android:textSize="42sp"
-        android:text="10:00 PM"
-        android:layout_gravity="center_horizontal"
+        android:text=""
+        android:layout_centerHorizontal="true"
         android:layout_marginTop="100dp"/>
-</FrameLayout>
+</RelativeLayout>

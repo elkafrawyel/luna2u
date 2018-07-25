@@ -12,16 +12,21 @@
         android:layout_height="match_parent"
         app:resize_mode="fill" />
 
-    <ProgressBar
-        android:id="@+id/live_player_loading_pb"
-        android:layout_width="wrap_content"
-        android:visibility="visible"
-        android:layout_centerInParent="true"
-        android:layout_height="wrap_content"
-        />
-
     <include
         layout="@layout/dialog_channel_info_tv"
         android:visibility="gone" />
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/channelNoView"
+        android:padding="10dp"
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="50dp"
+        android:layout_marginTop="20dp"
+        android:textColor="@color/text_color"
+        android:textSize="30sp"
+        android:textStyle="bold"
+        android:visibility="gone"
+        android:background="@drawable/login_edittext_bg"/>
 </RelativeLayout>

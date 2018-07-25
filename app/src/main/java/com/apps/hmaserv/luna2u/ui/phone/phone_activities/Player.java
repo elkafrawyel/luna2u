@@ -7,11 +7,8 @@ import android.content.pm.PackageManager;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.constraint.ConstraintLayout;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.media.session.PlaybackStateCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Surface;
@@ -19,9 +16,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
-import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.RetryPolicy;
@@ -32,9 +27,9 @@ import com.apps.hmaserv.luna2u.data.LunaDatabase;
 import com.apps.hmaserv.luna2u.data.model.LiveChannelsModel;
 import com.apps.hmaserv.luna2u.data.model.LiveGroupsModel;
 import com.apps.hmaserv.luna2u.ui.phone.phone_dialogs.Phone_ChoosePlayerDialog;
-import com.apps.hmaserv.luna2u.ui.tv.tv_adapters.TV_QuickListAdapter;
 import com.apps.hmaserv.luna2u.ui.tv.tv_dialogs.QuickListDialog;
 import com.apps.hmaserv.luna2u.utils.CommonMethods;
+import com.apps.hmaserv.luna2u.utils.Handler;
 import com.apps.hmaserv.luna2u.utils.ServerURL;
 import com.apps.hmaserv.luna2u.utils.VolleySingleton;
 import com.google.android.exoplayer2.ExoPlaybackException;
@@ -69,42 +64,49 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-import static android.view.KeyEvent.KEYCODE_BUTTON_SELECT;
-import static android.view.KeyEvent.KEYCODE_DPAD_CENTER;
 import static com.apps.hmaserv.luna2u.ui.LauncherActivity.MOBILE;
 import static com.apps.hmaserv.luna2u.ui.LauncherActivity.TV;
 import static com.apps.hmaserv.luna2u.ui.phone.phone_dialogs.Phone_ChoosePlayerDialog.EXO;
 import static com.apps.hmaserv.luna2u.ui.phone.phone_dialogs.Phone_ChoosePlayerDialog.VLC;
 
-public class Player extends AppCompatActivity implements
-        SimpleExoPlayer.VideoListener,
+public class Player extends AppCompatActivity implements SimpleExoPlayer.VideoListener,
         com.google.android.exoplayer2.Player.EventListener,
-        VideoRendererEventListener, QuickListDialog.ISelectedItem {
+        VideoRendererEventListener,
+        QuickListDialog.ISelectedItem {
     @BindView(R.id.channel_info_root)
     RelativeLayout channel_info_root;
     @BindView(R.id.tv_channel_name)
     TextView tv_channel_name;
     @BindView(R.id.tv_group_name)
     TextView tv_group_name;
+    @BindView(R.id.tv_VideoSize)
+    TextView tv_VideoSize;
     @BindView(R.id.player_root_view)
     RelativeLayout rootView;
-    @BindView(R.id.live_player_loading_pb)
-    ProgressBar loadingProgressBar;
     @BindView(R.id.video_view)
     SimpleExoPlayerView playerView;
+    @BindView(R.id.channelNoView)
+    TextView channelNoView;
     private SimpleExoPlayer player_View;
     public static final String VLC_PackageName = "org.videolan.vlc";
     public static final String VLC_Link = "https://play.google.com/store/apps/details?id="
             + VLC_PackageName;
 
-    public String Video_Url, Video_Group_Id, Video_Group_Name, Video_Name;
-    private String device_type;
+    public String mCurrentChannelId, mCurrentChannelUrl,
+            mCurrentCategoryId, mCurrentCategoryName, mCurrentChannelName;
+    public Boolean mCurrentChannelIsFav;
+    public LiveChannelsModel mCurrentChannel;
+    private String device_type, mVideoSize = "";
     private static final String TAG = "Luna2u";
     AudioManager audioManager;
+    String channelNumber = "";
+
+    ArrayList<LiveChannelsModel> AllChannels=new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -112,19 +114,16 @@ public class Player extends AppCompatActivity implements
         setContentView(R.layout.activity_phone_player);
         ButterKnife.bind(this);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        loadingProgressBar.getIndeterminateDrawable()
-                .setColorFilter(ContextCompat.getColor(this,
-                        R.color.text_color),
-                        android.graphics.PorterDuff.Mode.MULTIPLY);
-        ShowLoading();
-
         audioManager = (AudioManager) getApplicationContext().getSystemService(Context.AUDIO_SERVICE);
-
-        Video_Url = getIntent().getStringExtra("url");
-        Video_Group_Id = getIntent().getStringExtra("group_id");
-        Video_Group_Name = getIntent().getStringExtra("group_name");
-        Video_Name = getIntent().getStringExtra("name");
-
+        mCurrentChannelId = getIntent().getStringExtra("id");
+        mCurrentChannelUrl = getIntent().getStringExtra("url");
+        mCurrentCategoryId = getIntent().getStringExtra("group_id");
+        mCurrentCategoryName = getIntent().getStringExtra("group_name");
+        mCurrentChannelName = getIntent().getStringExtra("name");
+        mCurrentChannelIsFav = getIntent().getBooleanExtra("fav", false);
+        mCurrentChannel = new LiveChannelsModel(mCurrentChannelId,
+                mCurrentChannelName, mCurrentCategoryName, mCurrentChannelUrl,
+                mCurrentChannelIsFav);
         int type = CommonMethods.getDeviceType(this);
         switch (type) {
             case ServerURL.DEVICE_TYPE_PHONE:
@@ -136,9 +135,86 @@ public class Player extends AppCompatActivity implements
                 device_type = TV;
                 break;
         }
+        LoadChannels(NewApplication.getPreferencesHelper().getActivationCode());
+        LoadGroups(NewApplication.getPreferencesHelper().getActivationCode());
 
     }
+    RequestQueue mRequestQueue = VolleySingleton.getInstance().getRequestQueue();
 
+    private void LoadChannels(String code) {
+        mRequestQueue.add(
+                VolleySingleton.getInstance().makeStringResponse(ServerURL.AllChannels
+                                .concat(code),
+                        new VolleySingleton.VolleyCallback() {
+                            @Override
+                            public void onSuccess(String result) throws JSONException {
+                                JSONObject Groups = new JSONObject(result);
+                                JSONArray array = Groups.getJSONArray("channels");
+                                for (int i = 0; i < array.length(); i++) {
+                                    JSONObject object = new JSONObject(array.get(i).toString());
+                                    String id = object.getString("id");
+                                    String name = object.getString("name");
+                                    String url = object.getString("url");
+                                    String group = object.getString("group");
+
+                                    LiveChannelsModel liveChannelsModels = new LiveChannelsModel(id, name, group, url, false);
+                                    AllChannels.add(liveChannelsModels);
+                                }
+                            }
+                        }
+                        , new VolleySingleton.JsonVolleyCallbackError() {
+                            @Override
+                            public void onError(VolleyError error) {
+                                Handler.volleyErrorHandler(error,Player.this);
+                            }
+                        })
+        );
+    }
+    ArrayList<LiveGroupsModel>Groups;
+    private void LoadGroups(final String code) {
+        Groups = new ArrayList<>();
+        mRequestQueue.cancelAll(VolleySingleton.RequestKey);
+        mRequestQueue.add(
+                VolleySingleton.getInstance().makeStringResponse(
+                        ServerURL.LiveGroups_Url.concat(code),
+                        new VolleySingleton.VolleyCallback() {
+                            @Override
+                            public void onSuccess(String result) throws JSONException {
+                                JSONObject object = new JSONObject(result);
+                                JSONArray array = object.getJSONArray("groups");
+                                for (int i = 0; i < array.length(); i++) {
+                                    LiveGroupsModel model = new Gson().fromJson(array.get(i)
+                                            .toString(), LiveGroupsModel.class);
+                                    Groups.add(model);
+                                }
+                            }
+                        }, new VolleySingleton.JsonVolleyCallbackError() {
+                            @Override
+                            public void onError(VolleyError error) {
+                                Handler.volleyErrorHandler(error, Player.this);
+                            }
+                        }
+                )
+        ).setTag(VolleySingleton.RequestKey);
+    }
+
+    private LiveChannelsModel getChannelById(String id){
+        for (LiveChannelsModel model:AllChannels) {
+            if (model.getId().equals(id))
+                return model;
+
+        }
+        return null;
+    }
+
+    private LiveGroupsModel getGroupById(String id){
+        for (LiveGroupsModel model:Groups) {
+            if (model.getId().equals(id))
+                return model;
+
+        }
+        return null;
+    }
 
     @Override
     public void onStop() {
@@ -157,51 +233,54 @@ public class Player extends AppCompatActivity implements
 
         String ask = NewApplication.getPreferencesHelper().getASK();
         if (ask == null || ask.equals("0")) {
-            Phone_ChoosePlayerDialog dialog = new Phone_ChoosePlayerDialog(this, new Phone_ChoosePlayerDialog.IPlayerChooseCallback() {
-                @Override
-                public void whichPlayer(String player, Boolean Ask_again) {
-                    Play(Video_Url, player);
-                    if (Ask_again) {
-                        NewApplication.getPreferencesHelper().setASK("1");
-                        NewApplication.getPreferencesHelper().setPlayer(player);
-                    } else
-                        NewApplication.getPreferencesHelper().setASK("0");
-                }
+            Phone_ChoosePlayerDialog dialog =
+                    new Phone_ChoosePlayerDialog(this, new Phone_ChoosePlayerDialog.IPlayerChooseCallback() {
+                        @Override
+                        public void whichPlayer(String player, Boolean Ask_again) {
+                            Play(mCurrentChannelUrl, player);
+                            if (Ask_again) {
+                                NewApplication.getPreferencesHelper().setASK("1");
+                                NewApplication.getPreferencesHelper().setPlayer(player);
+                            } else
+                                NewApplication.getPreferencesHelper().setASK("0");
+                        }
 
-            });
+                    });
             dialog.show();
         } else {
             String player = NewApplication.getPreferencesHelper().getPlayer();
-            Play(Video_Url, player);
+            Play(mCurrentChannelUrl, player);
         }
-        if (device_type.equals(TV) && Video_Name != null && Video_Group_Name != null)
-            ShowChannelsInfo();
+        if (device_type.equals(TV) && mCurrentChannelName != null && mCurrentCategoryName != null)
+            ShowChannelsInfo(mCurrentChannel, mVideoSize);
 
         LoadGroupChannel();
 
     }
 
-    private void ShowChannelsInfo() {
+    private void ShowChannelsInfo(LiveChannelsModel model, String VideoSize) {
         channel_info_root.setVisibility(View.GONE);
-        tv_channel_name.setText(Video_Name);
-        tv_group_name.setText(Video_Group_Name);
+        String name = model.getId() + " - " + model.getName();
+        tv_channel_name.setText(name);
+        tv_group_name.setText(mCurrentCategoryName);
+        tv_VideoSize.setText(VideoSize);
         channel_info_root.setVisibility(View.VISIBLE);
         Thread thread = new Thread() {
             @Override
             public void run() {
                 try {
                     Thread.sleep(5000);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            // Do some stuff
+                            channel_info_root.setVisibility(View.GONE);
+                            tv_VideoSize.setVisibility(View.GONE);
+
+                        }
+                    });
                 } catch (InterruptedException ignored) {
-
                 }
-
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        // Do some stuff
-                        channel_info_root.setVisibility(View.GONE);
-                    }
-                });
             }
         };
         thread.start();
@@ -254,34 +333,90 @@ public class Player extends AppCompatActivity implements
     }
 
     @Override
-    public void SelectedItem(ArrayList<LiveChannelsModel>Channels
+    public void SelectedItem(ArrayList<LiveChannelsModel> Channels
             , LiveChannelsModel channel
-    , LiveGroupsModel liveGroupsModel) {
+            , LiveGroupsModel liveGroupsModel) {
         if (player_View != null) {
             releasePlayer();
         }
         this.Channels.clear();
-        this.Channels=Channels;
+        this.Channels = Channels;
         mCurrentChannel = channel;
         mCurrentIndex = Channels.indexOf(channel);
+        if (liveGroupsModel==null){
+            mCurrentCategoryId = "1";
+            mCurrentCategoryName = "Favorites";
+        }else {
+            mCurrentCategoryId = liveGroupsModel.getId();
+            mCurrentCategoryName = liveGroupsModel.getName();
+        }
 
-        Video_Group_Id=liveGroupsModel.getId();
-        Video_Group_Name=liveGroupsModel.getName();
+        mCurrentChannelName = mCurrentChannel.getName();
 
-        Video_Name = mCurrentChannel.getName();
-
-        if (device_type.equals(TV) && Video_Name != null && Video_Group_Name != null)
-            ShowChannelsInfo();
+        if (device_type.equals(TV) && mCurrentChannelName != null
+                && mCurrentCategoryName != null)
+            ShowChannelsInfo(mCurrentChannel, mVideoSize);
 
         Play(channel.getUrl(), EXO);
     }
 
     private int mCurrentIndex = -1;
-    private LiveChannelsModel mCurrentChannel = null;
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         switch (keyCode) {
+            case KeyEvent.KEYCODE_0:
+                channelNumber += "0";
+                writeChannelNumber(channelNumber);
+                return true;
+
+            case KeyEvent.KEYCODE_1:
+                channelNumber += "1";
+                writeChannelNumber(channelNumber);
+                return true;
+
+
+            case KeyEvent.KEYCODE_2:
+                channelNumber += "2";
+                writeChannelNumber(channelNumber);
+                return true;
+
+            case KeyEvent.KEYCODE_3:
+                channelNumber += "3";
+                writeChannelNumber(channelNumber);
+                return true;
+
+            case KeyEvent.KEYCODE_4:
+                channelNumber += "4";
+                writeChannelNumber(channelNumber);
+                return true;
+
+            case KeyEvent.KEYCODE_5:
+                channelNumber += "5";
+                writeChannelNumber(channelNumber);
+                return true;
+
+            case KeyEvent.KEYCODE_6:
+                channelNumber += "6";
+                writeChannelNumber(channelNumber);
+                return true;
+
+            case KeyEvent.KEYCODE_7:
+                channelNumber += "7";
+                writeChannelNumber(channelNumber);
+                return true;
+
+            case KeyEvent.KEYCODE_8:
+                channelNumber += "8";
+                writeChannelNumber(channelNumber);
+                return true;
+
+
+            case KeyEvent.KEYCODE_9:
+                channelNumber += "9";
+                writeChannelNumber(channelNumber);
+                return true;
+
             case KeyEvent.KEYCODE_ENTER:
             case KeyEvent.KEYCODE_DPAD_CENTER:
                 OpenSubMenu();
@@ -292,21 +427,23 @@ public class Player extends AppCompatActivity implements
                 //Show System Volume View
                 audioManager.adjustVolume(AudioManager.ADJUST_RAISE,
                         AudioManager.FLAG_PLAY_SOUND);
-                audioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_SAME, AudioManager.FLAG_SHOW_UI);                return true;
+                audioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_SAME, AudioManager.FLAG_SHOW_UI);
+                return true;
 
             case KeyEvent.KEYCODE_DPAD_LEFT:
             case KeyEvent.KEYCODE_ALT_LEFT:
                 //Show System Volume View
                 audioManager.adjustVolume(AudioManager.ADJUST_LOWER,
                         AudioManager.FLAG_PLAY_SOUND);
-                audioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_SAME, AudioManager.FLAG_SHOW_UI);                return true;
+                audioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_SAME, AudioManager.FLAG_SHOW_UI);
+                return true;
 
             case KeyEvent.KEYCODE_DPAD_UP:
                 if (Channels != null && Channels.size() > 0) {
 
                     if (mCurrentIndex == -1 && mCurrentChannel == null) {
                         for (LiveChannelsModel model : Channels) {
-                            if (model.getName().equals(Video_Name)) {
+                            if (model.getName().equals(mCurrentChannelName)) {
                                 mCurrentChannel = model;
                                 mCurrentIndex = Channels.indexOf(model);
                             }
@@ -316,34 +453,35 @@ public class Player extends AppCompatActivity implements
                         releasePlayer();
                     }
                     mCurrentIndex++;
-                    if (mCurrentIndex<Channels.size()){
+                    if (mCurrentIndex < Channels.size()) {
                         mCurrentChannel = Channels.get(mCurrentIndex);
                         Play(mCurrentChannel.getUrl(), EXO);
 
-                        Video_Name = mCurrentChannel.getName();
-                        Video_Group_Name = mCurrentChannel.getGroup();
+                        mCurrentChannelName = mCurrentChannel.getName();
+                        mCurrentCategoryName = mCurrentChannel.getGroup();
 
-                        if (device_type.equals(TV) && Video_Name != null && Video_Group_Name != null)
-                            ShowChannelsInfo();
-                    }else {
-                        mCurrentIndex=0;
+                        if (device_type.equals(TV) &&
+                                mCurrentChannelName != null &&
+                                mCurrentCategoryName != null)
+                            ShowChannelsInfo(mCurrentChannel, mVideoSize);
+                    } else {
+                        mCurrentIndex = 0;
                         mCurrentChannel = Channels.get(0);
                         Play(mCurrentChannel.getUrl(), EXO);
 
-                        Video_Name = mCurrentChannel.getName();
-                        Video_Group_Name = mCurrentChannel.getGroup();
+                        mCurrentChannelName = mCurrentChannel.getName();
+                        mCurrentCategoryName = mCurrentChannel.getGroup();
 
-                        if (device_type.equals(TV) && Video_Name != null && Video_Group_Name != null)
-                            ShowChannelsInfo();
+                        if (device_type.equals(TV) && mCurrentChannelName != null && mCurrentCategoryName != null)
+                            ShowChannelsInfo(mCurrentChannel, mVideoSize);
                     }
                 }
                 return true;
-                 case KeyEvent.KEYCODE_DPAD_DOWN:
-
+            case KeyEvent.KEYCODE_DPAD_DOWN:
                 if (Channels != null && Channels.size() > 0) {
                     if (mCurrentIndex == -1 && mCurrentChannel == null) {
                         for (LiveChannelsModel model : Channels) {
-                            if (model.getName().equals(Video_Name)) {
+                            if (model.getName().equals(mCurrentChannelName)) {
                                 mCurrentChannel = model;
                                 mCurrentIndex = Channels.indexOf(model);
                             }
@@ -353,33 +491,87 @@ public class Player extends AppCompatActivity implements
                         releasePlayer();
                     }
                     mCurrentIndex--;
-                    if (mCurrentIndex>=0){
+                    if (mCurrentIndex >= 0) {
                         mCurrentChannel = Channels.get(mCurrentIndex);
                         Play(mCurrentChannel.getUrl(), EXO);
 
-                        Video_Name = mCurrentChannel.getName();
-                        Video_Group_Name = mCurrentChannel.getGroup();
+                        mCurrentChannelName = mCurrentChannel.getName();
+                        mCurrentCategoryName = mCurrentChannel.getGroup();
 
-                        if (device_type.equals(TV) && Video_Name != null && Video_Group_Name != null)
-                            ShowChannelsInfo();
-                    }else {
-                        mCurrentIndex=Channels.size()-1;
-                        mCurrentChannel = Channels.get(Channels.size()-1);
+                        if (device_type.equals(TV) && mCurrentChannelName != null && mCurrentCategoryName != null)
+                            ShowChannelsInfo(mCurrentChannel, mVideoSize);
+                    } else {
+                        mCurrentIndex = Channels.size() - 1;
+                        mCurrentChannel = Channels.get(Channels.size() - 1);
                         Play(mCurrentChannel.getUrl(), EXO);
 
-                        Video_Name = mCurrentChannel.getName();
-                        Video_Group_Name = mCurrentChannel.getGroup();
+                        mCurrentChannelName = mCurrentChannel.getName();
+                        mCurrentCategoryName = mCurrentChannel.getGroup();
 
-                        if (device_type.equals(TV) && Video_Name != null && Video_Group_Name != null)
-                            ShowChannelsInfo();
+                        if (device_type.equals(TV) && mCurrentChannelName != null && mCurrentCategoryName != null)
+                            ShowChannelsInfo(mCurrentChannel, mVideoSize);
                     }
                 }
                 return true;
-               default:
+
+
+            default:
                 Log.d("OnKey", String.valueOf(keyCode));
                 return super.onKeyDown(keyCode, event);
         }
     }
+
+
+    private void writeChannelNumber(final String number) {
+        if (number.length() < 5) {
+            channelNoView.setVisibility(View.VISIBLE);
+            channelNoView.setText(number);
+            //Change Channel
+        } else {
+            channelNoView.setVisibility(View.GONE);
+            channelNoView.setText(number);
+            channelNumber = "";
+        }
+        Thread thread = new Thread() {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(5000);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            // Do some stuff
+                            channelNoView.setVisibility(View.GONE);
+                            int num = Integer.parseInt(channelNoView.getText().toString());
+                            channelNumber="";
+                            if (num<AllChannels.size()){
+                                LiveChannelsModel model=Objects.requireNonNull(getChannelById(String.valueOf(num)));
+                                releasePlayer();
+                                mCurrentChannel=model;
+                                Play(model.getUrl(),EXO);
+                                //find Channel
+                                LiveGroupsModel liveGroupsModel=getGroupById(model.getGroup());
+                                mCurrentCategoryId= Objects.requireNonNull(liveGroupsModel).getId();
+                                if (!mCurrentCategoryName.equals(liveGroupsModel.getName())){
+                                    mCurrentCategoryName=liveGroupsModel.getName();
+                                    LoadGroupChannel();
+                                }else {
+                                    mCurrentIndex=Channels.indexOf(model);
+                                }
+                                ShowChannelsInfo(model,"");
+                            }else {
+                                MDToast.makeText(Player.this,
+                                        "Channel Not Found",MDToast.TYPE_INFO).show();
+                            }
+                        }
+                    });
+                } catch (InterruptedException ignored) {
+                }
+            }
+        };
+        thread.start();
+    }
+
 
     ArrayList<LiveChannelsModel> Channels = new ArrayList<>();
 
@@ -387,7 +579,7 @@ public class Player extends AppCompatActivity implements
         String code = NewApplication.getPreferencesHelper().getActivationCode();
 
         String Channels_Url = ServerURL.LiveChannels_Url.concat(code).concat("/")
-                .concat(String.valueOf(Video_Group_Id));
+                .concat(String.valueOf(mCurrentCategoryId));
         RequestQueue mRequestQueue = VolleySingleton.getInstance().getRequestQueue();
         mRequestQueue.add(
                 VolleySingleton.getInstance().makeStringResponse(Channels_Url,
@@ -434,15 +626,15 @@ public class Player extends AppCompatActivity implements
     }
 
     private void OpenSubMenu() {
-        if (Video_Group_Id != null && Video_Group_Id.equals("1")) {
+        if (mCurrentCategoryId != null && mCurrentCategoryId.equals("1")) {
             QuickListDialog dialog = new QuickListDialog(
-                    Player.this, Video_Group_Id
+                    Player.this, mCurrentCategoryId
                     , Player.this);
             dialog.show();
-        } else if (Video_Group_Id != null && !Video_Group_Id.equals("1") &&
+        } else if (mCurrentCategoryId != null && !mCurrentCategoryId.equals("1") &&
                 Channels != null && Channels.size() > 0) {
             QuickListDialog dialog = new QuickListDialog(
-                    Player.this, Video_Group_Id
+                    Player.this, mCurrentCategoryId
                     , Player.this);
             dialog.show();
         }
@@ -502,15 +694,10 @@ public class Player extends AppCompatActivity implements
 
         //hide player controls
         playerView.setUseController(false);
-        HideLoading();
-    }
 
-    private void ShowLoading() {
-        loadingProgressBar.setVisibility(View.VISIBLE);
-    }
+        player_View.addListener(this);
+        player_View.addVideoListener(this);
 
-    private void HideLoading() {
-        loadingProgressBar.setVisibility(View.GONE);
     }
 
     @Override
@@ -545,15 +732,12 @@ public class Player extends AppCompatActivity implements
                 break;
             case com.google.android.exoplayer2.Player.STATE_BUFFERING:
                 Log.i(TAG, "playbackState:" + "STATE_BUFFERING");
-                ShowLoading();
                 break;
             case com.google.android.exoplayer2.Player.STATE_READY:
                 Log.i(TAG, "playbackState:" + "STATE_READY");
-                HideLoading();
                 break;
             case com.google.android.exoplayer2.Player.STATE_ENDED:
                 Log.i(TAG, "playbackState:" + "STATE_ENDED");
-                HideLoading();
                 break;
             default:
                 break;
@@ -572,7 +756,6 @@ public class Player extends AppCompatActivity implements
 
     @Override
     public void onPlayerError(ExoPlaybackException error) {
-        HideLoading();
         MDToast.makeText(Player.this, "Something went wrong while loading this channel please change the channel or try again later."
                 , MDToast.TYPE_ERROR).show();
     }
@@ -613,6 +796,16 @@ public class Player extends AppCompatActivity implements
 
     @Override
     public void onVideoSizeChanged(int width, int height, int unappliedRotationDegrees, float pixelWidthHeightRatio) {
+        mVideoSize = "";
+        mVideoSize = width + " x " + height;
+        if (height >= 720)
+            mVideoSize = mVideoSize + " HD";
+        else
+            mVideoSize = mVideoSize + " SD";
+
+        tv_VideoSize.setVisibility(View.VISIBLE);
+        ShowChannelsInfo(mCurrentChannel, mVideoSize);
+        mVideoSize = "";
 
     }
 
