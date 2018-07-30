@@ -11,6 +11,7 @@ public class TV_SettingCard {
     public static final int TYPE_SEARCH= 4;
     public static final int TYPE_FAVORITES= 5;
     public static final int TYPE_REFRESH= 6;
+    public static final int TYPE_HOME= 7;
 
     private int type;
 
@@ -27,7 +28,7 @@ public class TV_SettingCard {
             case TYPE_INFO:
                 return R.drawable.ic_info_outline_white_48dp;
             case TYPE_PLAYER:
-                return R.drawable.ic_replay_white_48dp;
+                return R.drawable.exo_controls_play;
             case TYPE_LOG_OUT:
                 return R.drawable.ic_exit_to_app_white_48dp;
             case TYPE_EXIT:
@@ -38,6 +39,8 @@ public class TV_SettingCard {
                 return R.drawable.ic_favorite_white_48dp;
             case TYPE_REFRESH:
                 return R.drawable.ic_replay_white_48dp;
+            case TYPE_HOME:
+                return R.drawable.ic_home_white_24dp;
             default:
                 return R.drawable.ic_search_white_36dp;
         }
@@ -59,6 +62,8 @@ public class TV_SettingCard {
                 return "Search";
             case TYPE_FAVORITES:
                 return "Favorites";
+            case TYPE_HOME:
+                return "Home";
             default:
                 return "Setting";
         }

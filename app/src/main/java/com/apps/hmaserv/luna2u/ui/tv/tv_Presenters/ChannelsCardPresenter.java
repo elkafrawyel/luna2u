@@ -21,8 +21,8 @@ import static com.apps.hmaserv.luna2u.ui.tv.tv_Fragments.TV_MainFragment.mCurren
 
 
 public class ChannelsCardPresenter extends Presenter {
-    private static int CARD_WIDTH = 400;
-    private static int CARD_HEIGHT = 250;
+    private static int CARD_WIDTH = 300;
+    private static int CARD_HEIGHT = 200;
 
     private Context mContext;
     private DataViewModel viewModel;

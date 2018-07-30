@@ -30,6 +30,8 @@ import java.util.TimeZone;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
+import static com.apps.hmaserv.luna2u.utils.VolleySingleton.RequestKey;
+
 public class Phone_Information extends AppCompatActivity
         implements VolleySingleton.VolleyCallback, VolleySingleton.JsonVolleyCallbackError{
 
@@ -90,7 +92,7 @@ public class Phone_Information extends AppCompatActivity
                 public void retry(VolleyError error) throws VolleyError {
 
                 }
-            });
+            }).setTag(RequestKey);
         }else
             MDToast.makeText(this, "No Internet Connection Available.",
                     Toast.LENGTH_SHORT,MDToast.TYPE_WARNING).show();

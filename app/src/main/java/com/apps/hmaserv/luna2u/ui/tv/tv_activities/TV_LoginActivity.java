@@ -11,6 +11,7 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.android.volley.RequestQueue;
@@ -42,7 +43,7 @@ public class TV_LoginActivity extends Activity
     }
 
     @BindView(R.id.login_activity_info_container_cl)
-    ConstraintLayout infoContainerLayout;
+    RelativeLayout infoContainerLayout;
     @BindView(R.id.login_activity_logo_imgv)
     ImageView appLogo;
     @BindView(R.id.login_activity_activation_code_et)

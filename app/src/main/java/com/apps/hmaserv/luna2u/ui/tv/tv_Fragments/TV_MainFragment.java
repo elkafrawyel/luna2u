@@ -51,6 +51,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.security.acl.Group;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -66,6 +67,7 @@ public class TV_MainFragment extends BrowseSupportFragment {
     BackgroundManager mBackgroundManager;
     TextView mCurrentTime;
     ArrayObjectAdapter mRowsAdapter;
+
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
@@ -78,16 +80,27 @@ public class TV_MainFragment extends BrowseSupportFragment {
         setBadgeDrawable(Objects.requireNonNull(getActivity())
                 .getResources().getDrawable(R.drawable.logo));
         //setTitle("Luna2u");
-        setHeadersState(HEADERS_HIDDEN);
+        setHeadersState(HEADERS_ENABLED);
+
         setHeadersTransitionOnBackEnabled(true);
+
         setBrandColor(getActivity().getResources().getColor(R.color.colorPrimaryDark));
         setSearchAffordanceColor(getActivity().getResources().getColor(R.color.text_color));
+
         mBackgroundManager = BackgroundManager.getInstance(getActivity());
         mBackgroundManager.attach(getActivity().getWindow());
+
         getMainFragmentRegistry().registerFragment(PageRow.class,
                 new LiveFragmentFactory(mBackgroundManager, getContext(),
                         getHeadersSupportFragment()
-                        , mCurrentTime, Channels));
+                        , mCurrentTime, Channels, new TV_SettingsFragment.IHomeClicked() {
+                    @Override
+                    public void Handle() {
+                        setSelectedPosition(4);
+                        //show header of categories
+                        startHeadersTransition(true);
+                    }
+                }));
         setHeaderPresenterSelector(new PresenterSelector() {
             @Override
             public Presenter getPresenter(Object item) {
@@ -99,14 +112,20 @@ public class TV_MainFragment extends BrowseSupportFragment {
                     return new RowHeaderPresenter();
             }
         });
+
         prepareEntranceTransition();
     }
 
     public void myOnKeyDown(int key_code) {
         if (key_code == KeyEvent.KEYCODE_BACK) {
-            setSelectedPosition(0);
-            mCurrentGroupId = "0";
-            setHeadersState(HEADERS_HIDDEN);
+            if (getSelectedPosition()==0){
+                setSelectedPosition(4);
+                //show header of categories
+                startHeadersTransition(true);
+            }else {
+                setSelectedPosition(0);
+                mCurrentGroupId = "0";
+            }
         }
     }
 
@@ -193,7 +212,7 @@ public class TV_MainFragment extends BrowseSupportFragment {
                                     Groups.add(model);
                                 }
                                 if (Groups.size() > 0) {
-                                    mThread thread=new mThread(code, new IChannelsLoaded() {
+                                    mThread thread = new mThread(code, new IChannelsLoaded() {
                                         @Override
                                         public void Loaded(ArrayList<LiveChannelsModel> Channels) {
                                             SetDataToAdapter();
@@ -206,7 +225,7 @@ public class TV_MainFragment extends BrowseSupportFragment {
                             @Override
                             public void onError(VolleyError error) {
                                 MDToast.makeText(Objects.requireNonNull(getContext()),
-                                        "Can't Load Groups From Server",MDToast.TYPE_ERROR).show();
+                                        "Can't Load Groups From Server", MDToast.TYPE_ERROR).show();
                                 Handler.volleyErrorHandler(error, getActivity());
                             }
                         }
@@ -214,22 +233,23 @@ public class TV_MainFragment extends BrowseSupportFragment {
         ).setTag(VolleySingleton.RequestKey);
     }
 
-    public class mThread extends Thread{
+    public class mThread extends Thread {
         IChannelsLoaded iChannelsLoaded;
         String Code;
+
         mThread(String Code, IChannelsLoaded iChannelsLoaded) {
             super(Code);
-            this.Code=Code;
+            this.Code = Code;
             this.iChannelsLoaded = iChannelsLoaded;
         }
 
         @Override
-            public void run() {
-                super.run();
-                LoadChannels(Code,iChannelsLoaded);
-                Log.e("Url",Thread.currentThread().getId()+"");
-            }
-        };
+        public void run() {
+            super.run();
+            LoadChannels(Code, iChannelsLoaded);
+            Log.e("Url", Thread.currentThread().getId() + "");
+        }
+    }
 
     private void LoadChannels(String code, final IChannelsLoaded iChannelsLoaded) {
         RequestQueue mRequestQueue = VolleySingleton.getInstance().getRequestQueue();
@@ -259,19 +279,18 @@ public class TV_MainFragment extends BrowseSupportFragment {
                             @Override
                             public void onError(VolleyError error) {
                                 MDToast.makeText(Objects.requireNonNull(getContext()),
-                                        "Can't Load Channels From Server",MDToast.TYPE_ERROR).show();
+                                        "Can't Load Channels From Server", MDToast.TYPE_ERROR).show();
                                 Handler.volleyErrorHandler(error, getContext());
                             }
                         })
         );
     }
 
-    public interface IChannelsLoaded{
+    public interface IChannelsLoaded {
         void Loaded(ArrayList<LiveChannelsModel> Channels);
     }
 
-
-    private void SetDataToAdapter() {
+    private void SetUpAdapter(){
         mRowsAdapter = new ArrayObjectAdapter(new ListRowPresenter());
         setAdapter(mRowsAdapter);
 
@@ -291,6 +310,7 @@ public class TV_MainFragment extends BrowseSupportFragment {
 
         for (int i = 0; i < Groups.size(); i++) {
             LiveGroupsModel category = Groups.get(i);
+
             TV_IconHeaderItem headerItem = new TV_IconHeaderItem
                     (i + 4, category.getId(), category.getName(), 2);
             PageRow pageRow1 = new PageRow(headerItem);
@@ -337,7 +357,11 @@ public class TV_MainFragment extends BrowseSupportFragment {
                 }
             });
         }
+    }
 
+    private void SetDataToAdapter() {
+
+        SetUpAdapter();
 
         setUpUiElements();
 
@@ -348,7 +372,9 @@ public class TV_MainFragment extends BrowseSupportFragment {
         super.onResume();
         //when back from logout window
         if (mBackgroundManager != null)
-            mBackgroundManager.setBitmap(BitmapFactory.decodeResource(Objects.requireNonNull(getContext()).getResources(), R.drawable.channels_tv_background));
+            mBackgroundManager.setBitmap(
+                    BitmapFactory.decodeResource(Objects.requireNonNull(getContext())
+                            .getResources(), R.drawable.channels_tv_background));
     }
 
     private static class LiveFragmentFactory extends FragmentFactory {
@@ -357,15 +383,18 @@ public class TV_MainFragment extends BrowseSupportFragment {
         HeadersSupportFragment headersSupportFragment;
         TextView mCurrentTime;
         ArrayList<LiveChannelsModel> Channels = new ArrayList<>();
-
+        TV_ChannelsFragment channelsFragment;
+        TV_SettingsFragment.IHomeClicked iHomeClicked;
         LiveFragmentFactory(BackgroundManager backgroundManager, Context mContext,
                             HeadersSupportFragment headersSupportFragment,
-                            TextView mCurrentTime, ArrayList<LiveChannelsModel> Channels) {
+                            TextView mCurrentTime, ArrayList<LiveChannelsModel> Channels, TV_SettingsFragment.IHomeClicked iHomeClicked) {
             this.mBackgroundManager = backgroundManager;
             this.mContext = mContext;
             this.headersSupportFragment = headersSupportFragment;
             this.mCurrentTime = mCurrentTime;
             this.Channels = Channels;
+            channelsFragment = new TV_ChannelsFragment();
+            this.iHomeClicked=iHomeClicked;
         }
 
         @Override
@@ -389,16 +418,18 @@ public class TV_MainFragment extends BrowseSupportFragment {
                         dialog.show();
                     }
                 };
+
+                settingsFragment.iHomeClicked=this.iHomeClicked;
                 ShowTime();
                 return settingsFragment;
             } else {
                 Bundle bundle = new Bundle();
                 bundle.putString("category_id", iconHeaderItem.getCategoryId());
                 bundle.putString("category_name", iconHeaderItem.getName());
-                TV_ChannelsFragment channelsFragment = new TV_ChannelsFragment();
                 channelsFragment.setArguments(bundle);
                 HideTime();
-                channelsFragment.Channels=Channels;
+                if (channelsFragment.Channels.size()==0)
+                    channelsFragment.Channels = Channels;
                 return channelsFragment;
             }
         }

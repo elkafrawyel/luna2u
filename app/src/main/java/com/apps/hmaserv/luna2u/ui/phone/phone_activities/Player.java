@@ -137,6 +137,7 @@ public class Player extends AppCompatActivity implements SimpleExoPlayer.VideoLi
         }
         LoadChannels(NewApplication.getPreferencesHelper().getActivationCode());
         LoadGroups(NewApplication.getPreferencesHelper().getActivationCode());
+        LoadGroupChannel();
 
     }
     RequestQueue mRequestQueue = VolleySingleton.getInstance().getRequestQueue();
@@ -254,7 +255,6 @@ public class Player extends AppCompatActivity implements SimpleExoPlayer.VideoLi
         if (device_type.equals(TV) && mCurrentChannelName != null && mCurrentCategoryName != null)
             ShowChannelsInfo(mCurrentChannel, mVideoSize);
 
-        LoadGroupChannel();
 
     }
 
@@ -440,7 +440,6 @@ public class Player extends AppCompatActivity implements SimpleExoPlayer.VideoLi
 
             case KeyEvent.KEYCODE_DPAD_UP:
                 if (Channels != null && Channels.size() > 0) {
-
                     if (mCurrentIndex == -1 && mCurrentChannel == null) {
                         for (LiveChannelsModel model : Channels) {
                             if (model.getName().equals(mCurrentChannelName)) {

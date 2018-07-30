@@ -18,6 +18,7 @@ public class PreferencesHelper {
     private static final String PREF_KEY_PLAYER = "KEY_PLAYER";
     private static final String PREF_KEY_ASK = "KEY_ASK";
     private static final String PREF_KEY_CHANNEL_IMAGE = "KEY_CHANNEL_IMAGE";
+    private static final String PREF_KEY_CAT = "KEY_CAT";
 
     public PreferencesHelper(Context context) {
         mSharedPreferences = context.getSharedPreferences(PREF_FILE_NAME, Context.MODE_PRIVATE);
@@ -94,4 +95,11 @@ public class PreferencesHelper {
         return mSharedPreferences.getBoolean(PREF_KEY_IS_SIGNED, false);
     }
 
+    public void setCat(String Cat) {
+        mSharedPreferences.edit().putString(PREF_KEY_CAT, Cat).apply();
+    }
+
+    public String getCat() {
+        return mSharedPreferences.getString(PREF_KEY_CAT, null);
+    }
 }

@@ -13,7 +13,6 @@ public class ServerURL {
     public static final String Refresh_Url="https://luna2u.com/api/update/";
 
 
-    String Code="2299734573";
-    String Code_="2382304828";
+    String Code="2385219785";
 
 }

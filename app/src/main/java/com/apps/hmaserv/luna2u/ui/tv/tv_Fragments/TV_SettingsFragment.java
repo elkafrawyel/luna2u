@@ -15,6 +15,7 @@ import android.support.v17.leanback.widget.ListRow;
 import android.support.v17.leanback.widget.ListRowPresenter;
 import android.support.v17.leanback.widget.Presenter;
 import android.support.v17.leanback.widget.RowPresenter;
+import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
@@ -44,6 +45,8 @@ public class TV_SettingsFragment extends RowsSupportFragment {
 
     public IFavoriteClicked iFavoriteClicked;
     public ISearchClicked iSearchClicked;
+    public IHomeClicked iHomeClicked;
+
     public TV_SettingsFragment() {
     }
 
@@ -68,12 +71,12 @@ public class TV_SettingsFragment extends RowsSupportFragment {
                 TV_SettingCard settingCard = (TV_SettingCard) item;
                 switch (settingCard.getType()) {
                     case 0:
-                        InformationDialog dialog=new InformationDialog(Objects.requireNonNull(getActivity()));
+                        InformationDialog dialog = new InformationDialog(Objects.requireNonNull(getActivity()));
                         dialog.show();
                         break;
 
                     case 1:
-                        PlayerDialog playerDialog=new PlayerDialog(Objects.requireNonNull(getActivity()));
+                        PlayerDialog playerDialog = new PlayerDialog(Objects.requireNonNull(getActivity()));
                         playerDialog.show();
                         break;
 
@@ -96,73 +99,62 @@ public class TV_SettingsFragment extends RowsSupportFragment {
 
                     case 6:
                         //Refresh
-
-
-
-
-
-
-
-
-                        String code=NewApplication.getPreferencesHelper().getActivationCode();
+                        String code = NewApplication.getPreferencesHelper().getActivationCode();
                         Refresh(code);
-
-
                         break;
+
+                    case 7:
+                        iHomeClicked.Handle();
                 }
             }
         });
     }
+
+    ProgressDialog progress;
     private final RequestQueue mRequestQueue = VolleySingleton.getInstance().getRequestQueue();
-    private void Refresh(String code){
+
+    private void Refresh(String code) {
+        mRequestQueue.getCache().clear();
+        progress = new ProgressDialog(getContext());
+        progress.setTitle("Refreshing");
+        progress.setMessage("Updating Channels and Groups,\nplease wait a while.");
+        progress.setCancelable(false);
+        progress.show();
         mRequestQueue.add(
                 VolleySingleton.getInstance().makeStringResponse(
                         ServerURL.Refresh_Url.concat(code),
                         new VolleySingleton.VolleyCallback() {
                             @Override
                             public void onSuccess(String result) throws JSONException {
-                                JSONObject Groups = new JSONObject(result);
-                                String code = Groups.getString("code");
-                                if(code.equals("0")){
-                                    mRequestQueue.getCache().remove(VolleySingleton.RequestKey);
-                                    final ProgressDialog progress = new ProgressDialog(getContext());
-                                    progress.setTitle("Refreshing");
-                                    progress.setMessage("Updating Channels and Groups,\nplease wait a while.");
-                                    progress.setCancelable(false);
-                                    progress.show();
-
-                                    Runnable progressRunnable = new Runnable() {
-
-                                        @Override
-                                        public void run() {
-                                            progress.cancel();
-                                            MDToast.makeText(NewApplication.getAppContext(),
-                                                    "success!", Toast.LENGTH_LONG,
-                                                    MDToast.TYPE_SUCCESS).show();
-
-                                        }
-                                    };
-
-                                    Handler pdCanceller = new Handler();
-                                    pdCanceller.postDelayed(progressRunnable, 60*5000);
-
-                                }else if (code.equals("2")){
+                                JSONObject object = new JSONObject(result);
+                                String code = object.getString("code");
+                                if (code.equals("0")) {
+                                    CallInfo(NewApplication.getPreferencesHelper().getActivationCode());
+                                    //progress.dismiss();
+//                                    MDToast.makeText(Objects.requireNonNull(getContext()),
+//                                            "Groups and Channels Updated Successfully.",
+//                                            Toast.LENGTH_SHORT,MDToast.TYPE_SUCCESS).show();
+                                } else if (code.equals("2")) {
                                     MDToast.makeText(NewApplication.getAppContext(),
-                                            "Subscription not found!", Toast.LENGTH_LONG,
+                                            "Try again Later!", Toast.LENGTH_LONG,
                                             MDToast.TYPE_ERROR).show();
+                                    progress.dismiss();
                                 }
                             }
                         }
                         , new VolleySingleton.JsonVolleyCallbackError() {
                             @Override
                             public void onError(VolleyError error) {
-
+                                progress.dismiss();
+                                MDToast.makeText(Objects.requireNonNull(getContext()),
+                                        "Groups and Channels Update Failed.",
+                                        Toast.LENGTH_SHORT, MDToast.TYPE_ERROR).show();
                             }
                         })
         ).setRetryPolicy(new RetryPolicy() {
             @Override
             public int getCurrentTimeout() {
-                return 5000;
+                return 1000 * 20;
             }
 
             @Override
@@ -174,7 +166,66 @@ public class TV_SettingsFragment extends RowsSupportFragment {
             public void retry(VolleyError error) throws VolleyError {
 
             }
-        }).setTag(RequestKey);
+        });
+    }
+
+    private int ThreeShould = 0;
+
+    private void CallInfo(final String code) {
+        Log.e("App Luna", "Info Called");
+        mRequestQueue.getCache().clear();
+        mRequestQueue.add(
+                VolleySingleton.getInstance().makeStringResponse(
+                        ServerURL.Information_Url.concat(code),
+                        new VolleySingleton.VolleyCallback() {
+                            @Override
+                            public void onSuccess(String result) throws JSONException {
+                                JSONObject object = new JSONObject(result);
+                                try {
+                                    String mCode = object.getString("code");
+                                    String mStatus = object.getString("status");
+                                    if (mCode.equals("1") && mStatus.equals("error")) {
+                                        try {
+                                            Thread.sleep(1000 * 20);
+                                            ThreeShould++;
+                                            Log.e("App Luna", "ThreeShould : "+ThreeShould);
+                                            if (ThreeShould == 10) {
+                                                progress.dismiss();
+                                                MDToast.makeText(Objects.requireNonNull(getContext()),
+                                                        "Groups and Channels Updated Successfully.",
+                                                        Toast.LENGTH_SHORT, MDToast.TYPE_SUCCESS).show();
+                                            } else
+                                                CallInfo(NewApplication.getPreferencesHelper()
+                                                        .getActivationCode());
+                                        } catch (InterruptedException e) {
+                                            e.printStackTrace();
+                                        }
+                                    } else {
+                                        Log.e("App Luna", "Info Called Done");
+
+                                        progress.dismiss();
+                                        MDToast.makeText(Objects.requireNonNull(getContext()),
+                                                "Groups and Channels Updated Successfully.",
+                                                Toast.LENGTH_SHORT, MDToast.TYPE_SUCCESS).show();
+                                    }
+                                } catch (Exception e) {
+                                    Log.e("App Luna", "Info Called Done E");
+
+                                    progress.dismiss();
+                                    MDToast.makeText(Objects.requireNonNull(getContext()),
+                                            "Groups and Channels Updated Successfully.",
+                                            Toast.LENGTH_SHORT, MDToast.TYPE_SUCCESS).show();
+
+                                }
+                            }
+                        }
+                        , new VolleySingleton.JsonVolleyCallbackError() {
+                            @Override
+                            public void onError(VolleyError error) {
+
+                            }
+                        })
+        ).setTag(RequestKey);
     }
 
     private void createCardRow() {
@@ -192,7 +243,10 @@ public class TV_SettingsFragment extends RowsSupportFragment {
         TV_SettingCard SearchSettingCard = new TV_SettingCard(TV_SettingCard.TYPE_SEARCH);
         TV_SettingCard FavoritesSettingCard = new TV_SettingCard(TV_SettingCard.TYPE_FAVORITES);
         TV_SettingCard RefreshSettingCard = new TV_SettingCard(TV_SettingCard.TYPE_REFRESH);
+        TV_SettingCard HomeSettingCard = new TV_SettingCard(TV_SettingCard.TYPE_HOME);
 
+        adapter.add(HomeSettingCard);
+        adapter.add(InfoSettingCard);
         adapter.add(SearchSettingCard);
         adapter.add(InfoSettingCard);
         adapter.add(FavoritesSettingCard);
@@ -200,7 +254,6 @@ public class TV_SettingsFragment extends RowsSupportFragment {
         adapter.add(PlayerSettingCard);
         adapter.add(ExitSettingCard);
         adapter.add(RefreshSettingCard);
-
         HeaderItem headerItem = new HeaderItem("Settings");
         mRowsAdapter.add(0, new ListRow(headerItem, adapter));
         setAdapter(mRowsAdapter);
@@ -208,12 +261,16 @@ public class TV_SettingsFragment extends RowsSupportFragment {
     }
 
 
-    public interface IFavoriteClicked{
+    public interface IFavoriteClicked {
         void Handle();
     }
 
 
-    public interface ISearchClicked{
+    public interface ISearchClicked {
+        void Handle();
+    }
+
+    public interface IHomeClicked{
         void Handle();
     }
 }
