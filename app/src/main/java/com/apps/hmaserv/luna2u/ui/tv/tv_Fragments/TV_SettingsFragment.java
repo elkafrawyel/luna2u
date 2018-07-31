@@ -248,12 +248,12 @@ public class TV_SettingsFragment extends RowsSupportFragment {
         adapter.add(HomeSettingCard);
         adapter.add(InfoSettingCard);
         adapter.add(SearchSettingCard);
-        adapter.add(InfoSettingCard);
-        adapter.add(FavoritesSettingCard);
-        adapter.add(logOutSettingCard);
         adapter.add(PlayerSettingCard);
-        adapter.add(ExitSettingCard);
         adapter.add(RefreshSettingCard);
+        adapter.add(logOutSettingCard);
+        adapter.add(FavoritesSettingCard);
+        adapter.add(ExitSettingCard);
+
         HeaderItem headerItem = new HeaderItem("Settings");
         mRowsAdapter.add(0, new ListRow(headerItem, adapter));
         setAdapter(mRowsAdapter);
