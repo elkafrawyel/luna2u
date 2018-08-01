@@ -27,6 +27,7 @@ import com.apps.hmaserv.luna2u.R;
 import com.apps.hmaserv.luna2u.ui.tv.tv_Presenters.SettingsIconPresenter;
 import com.apps.hmaserv.luna2u.ui.tv.tv_Models.TV_SettingCard;
 import com.apps.hmaserv.luna2u.ui.tv.tv_activities.TV_LogOut_Activity;
+import com.apps.hmaserv.luna2u.ui.tv.tv_activities.TV_LoginActivity;
 import com.apps.hmaserv.luna2u.ui.tv.tv_dialogs.InformationDialog;
 import com.apps.hmaserv.luna2u.ui.tv.tv_dialogs.PlayerDialog;
 import com.apps.hmaserv.luna2u.ui.tv.tv_dialogs.SearchDialog;
@@ -130,13 +131,9 @@ public class TV_SettingsFragment extends RowsSupportFragment {
                                 String code = object.getString("code");
                                 if (code.equals("0")) {
                                     CallInfo(NewApplication.getPreferencesHelper().getActivationCode());
-                                    //progress.dismiss();
-//                                    MDToast.makeText(Objects.requireNonNull(getContext()),
-//                                            "Groups and Channels Updated Successfully.",
-//                                            Toast.LENGTH_SHORT,MDToast.TYPE_SUCCESS).show();
                                 } else if (code.equals("2")) {
                                     MDToast.makeText(NewApplication.getAppContext(),
-                                            "Try again Later!", Toast.LENGTH_LONG,
+                                            "Updating....\nTry again Later!", Toast.LENGTH_LONG,
                                             MDToast.TYPE_ERROR).show();
                                     progress.dismiss();
                                 }
@@ -169,8 +166,6 @@ public class TV_SettingsFragment extends RowsSupportFragment {
         });
     }
 
-    private int ThreeShould = 0;
-
     private void CallInfo(final String code) {
         Log.e("App Luna", "Info Called");
         mRequestQueue.getCache().clear();
@@ -184,29 +179,14 @@ public class TV_SettingsFragment extends RowsSupportFragment {
                                 try {
                                     String mCode = object.getString("code");
                                     String mStatus = object.getString("status");
-                                    if (mCode.equals("1") && mStatus.equals("error")) {
+                                    if (mCode.equals("232") && mStatus.equals("updating")) {
                                         try {
                                             Thread.sleep(1000 * 20);
-                                            ThreeShould++;
-                                            Log.e("App Luna", "ThreeShould : "+ThreeShould);
-                                            if (ThreeShould == 10) {
-                                                progress.dismiss();
-                                                MDToast.makeText(Objects.requireNonNull(getContext()),
-                                                        "Groups and Channels Updated Successfully.",
-                                                        Toast.LENGTH_SHORT, MDToast.TYPE_SUCCESS).show();
-                                            } else
-                                                CallInfo(NewApplication.getPreferencesHelper()
-                                                        .getActivationCode());
+                                            CallInfo(NewApplication.getPreferencesHelper()
+                                                    .getActivationCode());
                                         } catch (InterruptedException e) {
                                             e.printStackTrace();
                                         }
-                                    } else {
-                                        Log.e("App Luna", "Info Called Done");
-
-                                        progress.dismiss();
-                                        MDToast.makeText(Objects.requireNonNull(getContext()),
-                                                "Groups and Channels Updated Successfully.",
-                                                Toast.LENGTH_SHORT, MDToast.TYPE_SUCCESS).show();
                                     }
                                 } catch (Exception e) {
                                     Log.e("App Luna", "Info Called Done E");
@@ -270,7 +250,7 @@ public class TV_SettingsFragment extends RowsSupportFragment {
         void Handle();
     }
 
-    public interface IHomeClicked{
+    public interface IHomeClicked {
         void Handle();
     }
 }

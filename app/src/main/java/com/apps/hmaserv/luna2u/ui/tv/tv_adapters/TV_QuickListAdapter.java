@@ -33,13 +33,14 @@ public class TV_QuickListAdapter extends
 
     private ArrayList<LiveChannelsModel> Channels=new ArrayList<>();
     private DataViewModel viewModel;
-
-    private int currentPosition;
+    private int pos;
     IItemClickHandler iItemClickHandler;
     Context context;
-    public TV_QuickListAdapter(ArrayList<LiveChannelsModel> channels,IItemClickHandler iItemClickHandler) {
+    public TV_QuickListAdapter(ArrayList<LiveChannelsModel> channels,
+                               IItemClickHandler iItemClickHandler,int pos) {
         this.iItemClickHandler=iItemClickHandler;
         this.Channels = channels;
+        this.pos=pos;
     }
 
     @NonNull
@@ -102,7 +103,12 @@ public class TV_QuickListAdapter extends
             }
         });
 
+        if (pos==position)
+            holder.itemCard.requestFocus();
+
+
     }
+
 
     @Override
     public int getItemCount() {

@@ -111,6 +111,27 @@ public class VolleySingleton {
 
     }
 
+    public StringRequest makeStringResponse(Boolean cache,final String url, final VolleyCallback callback, final JsonVolleyCallbackError errorCallback) {
+        return new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                Log.e("Url", url);
+                try {
+                    callback.onSuccess(response);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                errorCallback.onError(error);
+                Log.e("error", error.toString());
+            }
+        });
+
+    }
+
     @NonNull
     private Response<String> CacheVolley(NetworkResponse response) {
         try {

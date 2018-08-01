@@ -49,7 +49,7 @@ public class TV_ChannelsFragment extends TV_GridFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        int COLUMNS = 6;
+        int COLUMNS = 5;
         int ZOOM_FACTOR = FocusHighlight.ZOOM_FACTOR_SMALL;
         VerticalGridPresenter presenter = new VerticalGridPresenter(ZOOM_FACTOR);
         presenter.setNumberOfColumns(COLUMNS);

@@ -150,7 +150,7 @@ public class TV_MainFragment extends BrowseSupportFragment {
 
     private void CheckCodeValidation(final String Code_fromUser) {
         mRequestQueue.add(
-                VolleySingleton.getInstance().makeStringResponse(ServerURL.Code_Url.concat(Code_fromUser),
+                VolleySingleton.getInstance().makeStringResponse(false,ServerURL.Code_Url.concat(Code_fromUser),
                         new VolleySingleton.VolleyCallback() {
                             @Override
                             public void onSuccess(String result) throws JSONException {
@@ -164,10 +164,15 @@ public class TV_MainFragment extends BrowseSupportFragment {
                                 } else if (code.equals("2") && status.equals("error") && message.equals("Subscription expired")) {
                                     Toast.makeText(getActivity(),
                                             "Your Activation Code is Expired!!",
-                                            Toast.LENGTH_SHORT).show();
+                                            Toast.LENGTH_LONG).show();
                                     NewApplication.getPreferencesHelper().clear();
                                     Objects.requireNonNull(getActivity()).finish();
                                     getActivity().startActivity(new Intent(getActivity(), TV_LoginActivity.class));
+                                }else if (code.equals("1")&&status.equals("error")&&message.equals("Invalid subscription")){
+                                    mRequestQueue.getCache().clear();
+
+                                    startActivity(new Intent(getActivity(),TV_LoginActivity.class));
+                                    Objects.requireNonNull(getActivity()).finish();
                                 }
                             }
                         }

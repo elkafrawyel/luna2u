@@ -342,6 +342,7 @@ public class Player extends AppCompatActivity implements SimpleExoPlayer.VideoLi
         this.Channels.clear();
         this.Channels = Channels;
         mCurrentChannel = channel;
+
         mCurrentIndex = Channels.indexOf(channel);
         if (liveGroupsModel==null){
             mCurrentCategoryId = "1";
@@ -628,13 +629,13 @@ public class Player extends AppCompatActivity implements SimpleExoPlayer.VideoLi
         if (mCurrentCategoryId != null && mCurrentCategoryId.equals("1")) {
             QuickListDialog dialog = new QuickListDialog(
                     Player.this, mCurrentCategoryId
-                    , Player.this);
+                    , Player.this,mCurrentChannel);
             dialog.show();
         } else if (mCurrentCategoryId != null && !mCurrentCategoryId.equals("1") &&
                 Channels != null && Channels.size() > 0) {
             QuickListDialog dialog = new QuickListDialog(
                     Player.this, mCurrentCategoryId
-                    , Player.this);
+                    , Player.this,mCurrentChannel);
             dialog.show();
         }
     }
