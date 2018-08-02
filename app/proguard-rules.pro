@@ -48,6 +48,6 @@
   public *;
 }
 
--keep class com.apps.hmaserv.luna2u.data.model.** {*;}
+-keep class com.apps.tv.luna2u.data.model.** {*;}
 -keep class org.xmlpull.v1.** { *; }
--dontwarn com.apps.hmaserv.luna2u.**
+-dontwarn com.apps.tv.luna2u.**
