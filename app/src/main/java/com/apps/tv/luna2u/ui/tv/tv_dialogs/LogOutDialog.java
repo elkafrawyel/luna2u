@@ -42,7 +42,9 @@ public class LogOutDialog extends GuidedStepSupportFragment {
     @Override
     public void onGuidedActionClicked(GuidedAction action) {
         if (ACTION_ID_POSITIVE == action.getId()) {
+            String code=NewApplication.getPreferencesHelper().getActivationCode();
             NewApplication.getPreferencesHelper().clear();
+            NewApplication.getPreferencesHelper().setActivationCode(code);
             TV_LoginActivity.start(getActivity());
         } else {
             Objects.requireNonNull(getActivity()).finish();

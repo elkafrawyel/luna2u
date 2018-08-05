@@ -136,8 +136,9 @@ public class Phone_Groups extends AppCompatActivity {
                                     LoadGroups(Code_fromUser);
                                 } else if (code.equals("2") && status.equals("error") && message.equals("Subscription expired")) {
                                     MDToast.makeText(Phone_Groups.this, "Your Activation Code is Expired!!", Toast.LENGTH_SHORT,MDToast.TYPE_WARNING).show();
+                                    String mCode=NewApplication.getPreferencesHelper().getActivationCode();
                                     NewApplication.getPreferencesHelper().clear();
-                                    Phone_Groups.this.finish();
+                                    NewApplication.getPreferencesHelper().setActivationCode(mCode);                                    Phone_Groups.this.finish();
                                     startActivity(new Intent(Phone_Groups.this, Phone_Login.class));
                                 }
                             }

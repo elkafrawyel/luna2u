@@ -252,12 +252,14 @@ public class TV_MainFragment extends BrowseSupportFragment {
 
                                 if (code.equals("0") && status.equals("success") && message.equals("Valid")) {
                                     LoadGroups(Code_fromUser);
-                                } else if (code.equals("2") && status.equals("error") && message.equals("Subscription expired")) {
+                                } else if (code.equals("2") && status.equals("error") &&
+                                        message.equals("Subscription expired")) {
                                     Toast.makeText(getActivity(),
                                             "Your Activation Code is Expired!!",
                                             Toast.LENGTH_LONG).show();
+                                    String mCode=NewApplication.getPreferencesHelper().getActivationCode();
                                     NewApplication.getPreferencesHelper().clear();
-                                    Objects.requireNonNull(getActivity()).finish();
+                                    NewApplication.getPreferencesHelper().setActivationCode(mCode);                                         Objects.requireNonNull(getActivity()).finish();
                                     getActivity().startActivity(new Intent(getActivity(), TV_LoginActivity.class));
                                 } else if (code.equals("1") && status.equals("error") && message.equals("Invalid subscription")) {
                                     mRequestQueue.getCache().clear();

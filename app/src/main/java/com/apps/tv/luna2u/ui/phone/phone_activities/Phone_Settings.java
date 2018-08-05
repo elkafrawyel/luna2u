@@ -140,7 +140,9 @@ public class Phone_Settings extends AppCompatActivity {
 
     @OnClick(R.id.phone_settings_activity_log_out)
     void LogOut_Clicked(){
+        String mCode=NewApplication.getPreferencesHelper().getActivationCode();
         NewApplication.getPreferencesHelper().clear();
+        NewApplication.getPreferencesHelper().setActivationCode(mCode);
         Phone_Splash.start(this);
     }
 
